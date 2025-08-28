@@ -1,0 +1,287 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Raleway', sans-serif;
+}
+
+/* Navbar glass effect */
+.navbar-glass {
+    background-color: rgba(0, 124, 70, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 124, 70, 0.98);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: right 0.3s ease-in-out;
+    z-index: 40;
+}
+
+    .mobile-nav.active {
+        right: 0;
+    }
+
+.mobile-nav-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 2rem;
+}
+
+    .mobile-nav-links a {
+        font-size: 1.25rem;
+        color: #F1F1F1;
+        padding: 1rem;
+        transition: opacity 0.2s;
+        min-height: 44px;
+        min-width: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .mobile-nav-links a:hover {
+            opacity: 0.8;
+        }
+
+.hamburger {
+    display: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 50;
+}
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+    }
+
+    .desktop-nav {
+        display: none;
+    }
+}
+
+#map {
+    z-index: 10;
+}
+
+.custom-div-icon {
+    background: none;
+    border: none;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+}
+
+.leaflet-popup-content-wrapper {
+    padding: 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.leaflet-popup-close-button {
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.25rem;
+    width: 2rem;
+    height: 2rem;
+    color: #F1F1F1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Remove default link styles in popups */
+.leaflet-popup-content a {
+    text-decoration: none;
+    color: #f1f1f1;
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(13, 13, 13, 0.7);
+    z-index: 50;
+    display: none;
+    padding: 1rem;
+}
+
+@media (min-width: 768px) {
+    .modal-overlay {
+        padding: 2rem;
+    }
+}
+
+.modal-overlay.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal-content {
+    background: #F1F1F1;
+    border-radius: 1rem;
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    box-shadow: 0 20px 25px -5px rgba(13, 13, 13, 0.1), 0 10px 10px -5px rgba(13, 13, 13, 0.04);
+}
+
+    /* Scrollbar styling for modal content */
+    .modal-content::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .modal-content::-webkit-scrollbar-track {
+        background: rgba(13, 13, 13, 0.05);
+        border-radius: 4px;
+    }
+
+    .modal-content::-webkit-scrollbar-thumb {
+        background: rgba(13, 13, 13, 0.2);
+        border-radius: 4px;
+    }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(13, 13, 13, 0.3);
+        }
+
+.modal-overlay.active .modal-content {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease-out;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(13, 13, 13, 0.5);
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F1F1F1;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 60;
+    backdrop-filter: blur(4px);
+}
+
+    .modal-close:hover {
+        background: rgba(13, 13, 13, 0.7);
+        transform: scale(1.1);
+    }
+
+/* Calendar styles */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.calendar-month {
+    background: white;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-month-header {
+    background: #007C46;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    font-weight: 600;
+}
+
+.calendar-month-content {
+    padding: 1rem;
+}
+
+.plant-tag {
+    display: inline-block;
+    background: #6A9D4D20;
+    color: #007C46;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    margin: 0.25rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    .modal-content {
+        border-radius: 0.75rem;
+        margin: 0;
+    }
+
+    .modal-close {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 2rem;
+        height: 2rem;
+    }
+
+    .calendar-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Video container aspect ratio */
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 0.5rem;
+    }
