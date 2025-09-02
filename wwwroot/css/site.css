@@ -1,18 +1,41 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+/* === GLOBAL STYLES === */
 html {
     scroll-behavior: smooth;
 }
 
 body {
     font-family: 'Montserrat', sans-serif;
+    background-color: #F1F1F1;
+    color: #333;
+    line-height: 1.6;
 }
 
+.link-hover:hover {
+    color: #333 !important;
+}
+
+/* Títulos sempre com Raleway */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Raleway', sans-serif;
+    font-weight: 700;
 }
+
+/* Parágrafos e textos */
+p, li, label, input, textarea, button, .form-control, .lead {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Botões verdes (Bootstrap override) */
+.btn-primary, .btn-success {
+    background-color: #007C46;
+    border-color: #007C46;
+    color: #F1F1F1;
+}
+
+    .btn-primary:hover, .btn-success:hover {
+        background-color: #00623B;
+        border-color: #00623B;
+    }
 
 /* Navbar glass effect */
 .navbar-glass {
@@ -81,6 +104,19 @@ h1, h2, h3, h4, h5, h6 {
     }
 }
 
+/* FAQ Accordion - borda clean */
+.accordion-button {
+    font-family: 'Raleway', sans-serif;
+    font-weight: 600;
+    color: #007C46;
+}
+
+    .accordion-button:not(.collapsed) {
+        background-color: rgba(0, 124, 70, 0.05);
+        color: #007C46;
+    }
+
+/* Map styles */
 #map {
     z-index: 10;
 }
@@ -110,10 +146,9 @@ h1, h2, h3, h4, h5, h6 {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Remove default link styles in popups */
 .leaflet-popup-content a {
     text-decoration: none;
-    color: #f1f1f1;
+    color: #F1F1F1;
 }
 
 /* Modal styles */
@@ -155,7 +190,6 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 20px 25px -5px rgba(13, 13, 13, 0.1), 0 10px 10px -5px rgba(13, 13, 13, 0.04);
 }
 
-    /* Scrollbar styling for modal content */
     .modal-content::-webkit-scrollbar {
         width: 8px;
     }
@@ -231,7 +265,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .plant-tag {
     display: inline-block;
-    background: #6A9D4D20;
+    background: rgba(106, 157, 77, 0.125);
     color: #007C46;
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
