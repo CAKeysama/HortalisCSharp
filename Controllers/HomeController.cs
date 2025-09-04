@@ -18,7 +18,7 @@ namespace HortalisCSharp.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult Tutoriais()
         {
             return View();
         }
