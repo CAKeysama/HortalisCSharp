@@ -1,469 +1,112 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    // Define o título que aparecerá na aba do navegador
+    ViewData["Title"] = "Dicas e Tutoriais";
 }
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dicas e Tutoriais - Hortalis</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="/css/styles.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body class="bg-neutral-light font-montserrat overflow-x-hidden">
-    <header class="fixed w-full navbar-glass shadow-sm z-50">
-        <nav class="container mx-auto px-4 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-                <img src="/assets/Logo Branca.svg" alt="Hortalis Logo" class="h-8 w-8" />
-                <a href="/#inicio"><span class="font-raleway font-extrabold text-2xl text-neutral-light pt-2">Hortalis</span></a>
-            </div>
-            <div class="hidden md:flex space-x-6">
-                <a href="/" class="text-neutral-light hover:text-neutral-light/80 transition-colors">Início</a>
-                <a href="/#sobre" class="text-neutral-light hover:text-neutral-light/80 transition-colors">Sobre</a>
-                <a href="/#mapa" class="text-neutral-light hover:text-neutral-light/80 transition-colors">Mapa</a>
-                <a href="/#contato" class="text-neutral-light hover:text-neutral-light/80 transition-colors">Indicar Horta</a>
-                <a href="/tutoriais.html" class="text-neutral-light hover:text-neutral-light/80 transition-colors">Tutoriais</a>
-                <a href="/autores.html" class="text-neutral-light hover:text-neutral-light/80 transition-colors">Autores</a>
-            </div>
 
-            <!-- Hamburger Menu -->
-            <button class="hamburger md:hidden"
-                    aria-label="Menu de navegação"
-                    onclick="toggleMobileNav()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-            </button>
+<main style="padding-top: 70px;">
+    <section style="background-color: rgba(76, 175, 80, 0.05); padding: 4rem 0;">
+        <div class="container">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-4" style="font-family: 'Raleway', sans-serif;">Dicas e Tutoriais de Jardinagem</h1>
+                <p class="lead mb-5">
+                    Aprenda a cultivar seu próprio alimento com nossos guias práticos e dicas especializadas.
+                    Do primeiro vaso à sua horta completa, estamos aqui para ajudar em cada passo.
+                </p>
 
-            <!-- Mobile Navigation -->
-            <div class="mobile-nav" id="mobileNav">
-                <div class="mobile-nav-links">
-                    <a href="/" onclick="closeMobileNav()">Início</a>
-                    <a href="/#sobre" onclick="closeMobileNav()">Sobre</a>
-                    <a href="/#mapa" onclick="closeMobileNav()">Mapa</a>
-                    <a href="/#contato" onclick="closeMobileNav()">Indicar Horta</a>
-                    <a href="/tutoriais.html" onclick="closeMobileNav()">Tutoriais</a>
-                    <a href="/autores.html" onclick="closeMobileNav()">Autores</a>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <main class="pt-24 w-full max-w-full overflow-x-hidden">
-        <!-- Hero Section -->
-        <section class="bg-primary/5 py-8 sm:py-16 w-full max-w-full">
-            <div class="container mx-auto px-2 sm:px-4 w-full max-w-full min-w-0">
-                <div class="w-full max-w-4xl mx-auto text-center min-w-0">
-                    <h1 class="font-raleway text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-dark mb-6 break-words">
-                        Dicas e Tutoriais de Jardinagem
-                    </h1>
-                    <p class="text-lg sm:text-xl text-neutral-dark mb-8 break-words">
-                        Aprenda a cultivar seu próprio alimento com nossos guias práticos e dicas especializadas.
-                        Do primeiro vaso à sua horta completa, estamos aqui para ajudar em cada passo.
-                    </p>
-                    <div class="flex flex-wrap gap-2 sm:gap-4 justify-center w-full max-w-full min-w-0 pb-4">
-                        <button class="tab-button bg-primary text-neutral-light sm:px-6 px-3 py-3 rounded-lg transition-colors break-words"
-                                data-tab="primeiros-passos">
-                            Primeiros Passos
-                        </button>
-                        <button class="tab-button bg-primary/10 text-primary sm:px-6 px-3 py-3 rounded-lg transition-colors break-words"
-                                data-tab="guias">
-                            Guias Práticos
-                        </button>
-                        <button class="tab-button bg-primary/10 text-primary sm:px-6 px-3 py-3 rounded-lg transition-colors break-words"
-                                data-tab="dicas">
-                            Dicas Sazonais
-                        </button>
-                        <button class="tab-button bg-primary/10 text-primary sm:px-6 px-3 py-3 rounded-lg transition-colors break-words"
-                                data-tab="glossario">
-                            Glossário
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Content Sections -->
-        <section class="py-8 sm:py-16 w-full max-w-full">
-            <div class="container mx-auto px-2 sm:px-4 w-full max-w-full">
-                <!-- Primeiros Passos -->
-                <div id="primeiros-passos" class="tab-content">
-                    <div class="max-w-4xl mx-auto">
-                        <div class="grid md:grid-cols-2 gap-8 mb-12">
-                            <div>
-                                <h2 class="font-raleway text-3xl font-bold text-neutral-dark mb-6">
-                                    Começando sua Horta
-                                </h2>
-                                <div class="space-y-6">
-                                    <div class="flex items-start gap-4">
-                                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M12 2v2m0 16v2M4 12H2m20 0h-2m-2.05-6.95l-1.41 1.41M5.46 18.54l-1.41 1.41m0-14l1.41 1.41m11.13 11.13l1.41 1.41M12 7a5 5 0 0 0-5 5 5 5 0 0 0 5 5 5 5 0 0 0 5-5 5 5 0 0 0-5-5z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-semibold text-lg text-neutral-dark mb-2">Escolha o Local</h3>
-                                            <p class="text-neutral-dark">Procure um espaço com boa iluminação natural, pelo menos 6 horas de sol por dia. A exposição solar adequada é crucial para o desenvolvimento saudável das plantas.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-start gap-4">
-                                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                                <circle cx="12" cy="10" r="3" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-semibold text-lg text-neutral-dark mb-2">Prepare o Solo</h3>
-                                            <p class="text-neutral-dark">Use substrato de qualidade e adicione composto orgânico para enriquecer a terra. Um solo bem preparado é a base para plantas saudáveis e produtivas.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-start gap-4">
-                                        <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-semibold text-lg text-neutral-dark mb-2">Escolha as Plantas</h3>
-                                            <p class="text-neutral-dark">Comece com plantas fáceis de cultivar, como alface, cebolinha e hortelã. Estas são ótimas opções para iniciantes e oferecem resultados rápidos.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="relative h-full">
-                                <img src="https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                                     alt="Iniciando uma Horta"
-                                     class="rounded-2xl shadow-lg w-full h-full object-cover" />
-                                <div class="absolute inset-0 bg-gradient-to-t from-neutral-dark/30 to-transparent rounded-2xl"></div>
-                            </div>
-                        </div>
-
-                        <!-- Video Tutorial -->
-                        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-12">
-                            <div class="video-container">
-                                <iframe src="https://www.youtube.com/embed/8IqecvY3IWg"
-                                        frameborder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowfullscreen></iframe>
-                            </div>
-                            <div class="p-6">
-                                <h3 class="font-raleway text-2xl font-bold text-neutral-dark mb-2">
-                                    Tutorial: Como Fazer uma Horta em Casa
-                                </h3>
-                                <p class="text-neutral-dark">
-                                    Neste vídeo completo, você aprenderá passo a passo como criar sua própria horta em casa.
-                                    Desde a escolha do local até o plantio das primeiras mudas, todas as dicas essenciais para começar.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Guias Práticos -->
-                <div id="guias" class="tab-content hidden">
-                    <div class="max-w-4xl mx-auto">
-                        <div class="grid md:grid-cols-2 gap-8">
-                            <!-- Guia 1: Horta em Vasos -->
-                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                                     alt="Horta em Vasos"
-                                     class="w-full h-48 object-cover" />
-                                <div class="p-6">
-                                    <h3 class="font-raleway text-xl font-bold text-neutral-dark mb-3">
-                                        Horta em Vasos
-                                    </h3>
-                                    <p class="text-neutral-dark mb-4">
-                                        Aprenda a cultivar uma horta produtiva mesmo em espaços pequenos.
-                                    </p>
-                                    <ol class="space-y-2 text-neutral-dark">
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">1</span>
-                                            <span>Escolha dos vasos adequados.</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">2</span>
-                                            <span>Sistema de drenagem eficiente</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">3</span>
-                                            <span>Substrato específico para vasos</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">4</span>
-                                            <span>Manejo da irrigação em ambientes fechados</span>
-                                        </li>
-                                    </ol>
-                                </div>
-                            </div>
-
-                            <!-- Guia 2: Controle Natural de Pragas -->
-                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1628352081506-83c43123ed6d?q=80&w=1896&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                     alt="Controle Natural de Pragas"
-                                     class="w-full h-48 object-cover" />
-                                <div class="p-6">
-                                    <h3 class="font-raleway text-xl font-bold text-neutral-dark mb-3">
-                                        Controle Natural de Pragas
-                                    </h3>
-                                    <p class="text-neutral-dark mb-4">
-                                        Proteja suas plantas usando métodos naturais e sustentáveis.
-                                    </p>
-                                    <ol class="space-y-2 text-neutral-dark">
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">1</span>
-                                            <span>Plantas companheiras e repelentes naturais</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">2</span>
-                                            <span>Preparados caseiros para controle de insetos</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">3</span>
-                                            <span>Manejo integrado de pragas</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">4</span>
-                                            <span>Prevenção e monitoramento</span>
-                                        </li>
-                                    </ol>
-                                </div>
-                            </div>
-
-                            <!-- Guia 3: Compostagem Doméstica -->
-                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                                <img src="https://images.unsplash.com/photo-1591955506264-3f5a6834570a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80"
-                                     alt="Compostagem Doméstica"
-                                     class="w-full h-48 object-cover" />
-                                <div class="p-6">
-                                    <h3 class="font-raleway text-xl font-bold text-neutral-dark mb-3">
-                                        Compostagem Doméstica
-                                    </h3>
-                                    <p class="text-neutral-dark mb-4">
-                                        Transforme resíduos orgânicos em adubo rico em nutrientes.
-                                    </p>
-                                    <ol class="space-y-2 text-neutral-dark">
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">1</span>
-                                            <span>Montagem da composteira</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">2</span>
-                                            <span>Materiais compostáveis e não compostáveis</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">3</span>
-                                            <span>Manutenção e cuidados</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">4</span>
-                                            <span>Uso do composto na horta</span>
-                                        </li>
-                                    </ol>
-                                </div>
-                            </div>
-
-                            <!-- Guia 4: Colheita e Armazenamento -->
-                            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                                <img src="https://plus.unsplash.com/premium_photo-1733870973456-823b8f91e784?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                     alt="Colheita e Armazenamento"
-                                     class="w-full h-48 object-cover" />
-                                <div class="p-6">
-                                    <h3 class="font-raleway text-xl font-bold text-neutral-dark mb-3">
-                                        Colheita e Armazenamento
-                                    </h3>
-                                    <p class="text-neutral-dark mb-4">
-                                        Aprenda o momento ideal para colher e como conservar seus alimentos.
-                                    </p>
-                                    <ol class="space-y-2 text-neutral-dark">
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">1</span>
-                                            <span>Ponto ideal de colheita por tipo de planta</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">2</span>
-                                            <span>Técnicas de colheita adequadas</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">3</span>
-                                            <span>Limpeza e higienização</span>
-                                        </li>
-                                        <li class="flex items-center gap-2">
-                                            <span class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm flex-shrink-0">4</span>
-                                            <span>Métodos de conservação natural</span>
-                                        </li>
-                                    </ol>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Dicas Sazonais -->
-                <div id="dicas" class="tab-content hidden">
-                    <div class="max-w-4xl mx-auto">
-                        <!-- Calendário de Plantio -->
-                        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8 max-w-full w-full overflow-x-hidden">
-                            <h3 class="font-raleway text-2xl font-bold text-neutral-dark mb-6 break-words">
-                                Calendário de Plantio
-                            </h3>
-                            <div class="w-full">
-                                <div class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 w-full">
-                                    <button class="sm:px-6 px-3 py-3 bg-primary/10 rounded-lg text-primary hover:bg-primary/20 transition-colors font-medium break-words">
-                                        Primavera
-                                    </button>
-                                    <button class="sm:px-6 px-3 py-3 bg-primary/10 rounded-lg text-primary hover:bg-primary/20 transition-colors font-medium break-words">
-                                        Verão
-                                    </button>
-                                    <button class="sm:px-6 px-3 py-3 bg-primary/10 rounded-lg text-primary hover:bg-primary/20 transition-colors font-medium break-words">
-                                        Outono
-                                    </button>
-                                    <button class="sm:px-6 px-3 py-3 bg-primary/10 rounded-lg text-primary hover:bg-primary/20 transition-colors font-medium break-words">
-                                        Inverno
-                                    </button>
-                                </div>
-                            </div>
-                            <div id="calendario-plantio" class="calendar-grid w-full max-w-full overflow-x-auto min-w-0"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Glossário -->
-                <div id="glossario" class="tab-content hidden">
-                    <div class="max-w-4xl mx-auto">
-                        <div class="bg-white rounded-xl shadow-lg p-6">
-                            <h3 class="font-raleway text-2xl font-bold text-neutral-dark mb-6">
-                                Termos Comuns de Jardinagem
-                            </h3>
-                            <div class="grid gap-6">
-                                <div class="border-b border-primary/10 pb-4">
-                                    <h4 class="font-semibold text-neutral-dark mb-2">Substrato</h4>
-                                    <p class="text-neutral-dark">Meio de cultivo preparado para o desenvolvimento das plantas, composto por diferentes materiais orgânicos e minerais.</p>
-                                </div>
-                                <div class="border-b border-primary/10 pb-4">
-                                    <h4 class="font-semibold text-neutral-dark mb-2">Compostagem</h4>
-                                    <p class="text-neutral-dark">Processo de decomposição controlada de materiais orgânicos que resulta em um composto rico em nutrientes.</p>
-                                </div>
-                                <div class="border-b border-primary/10 pb-4">
-                                    <h4 class="font-semibold text-neutral-dark mb-2">Adubação Verde</h4>
-                                    <p class="text-neutral-dark">Cultivo de plantas específicas para melhorar a qualidade do solo, geralmente leguminosas.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Newsletter Section -->
-        <section class="bg-primary/5 py-16">
-            <div class="container mx-auto px-4">
-                <div class="max-w-2xl mx-auto text-center">
-                    <h2 class="font-raleway text-3xl font-bold text-neutral-dark mb-4">
-                        Receba Dicas Semanais
-                    </h2>
-                    <p class="text-neutral-dark mb-8">
-                        Inscreva-se para receber nossas melhores dicas de jardinagem,
-                        calendários de plantio atualizados e novidades do mundo das hortas urbanas.
-                    </p>
-                    <form class="flex gap-4">
-                        <input type="email"
-                               name="email"
-                               placeholder="Seu melhor e-mail"
-                               class="flex-1 px-4 py-3 rounded-lg border border-primary/20 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                               required />
-                        <button type="submit"
-                                class="bg-primary text-neutral-light px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors">
-                            Inscrever
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="bg-primary text-neutral-light py-16">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-12">
-                <!-- Sobre o Hortalis -->
-                <div>
-                    <h3 class="text-xl font-bold mb-6">Sobre o Hortalis</h3>
-                    <p class="text-neutral-light/90 mb-8">
-                        Conectamos pessoas a hortas comunitárias para promover alimentação saudável, sustentabilidade e integração social.
-                    </p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                            </svg>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Links Rápidos -->
-                <div>
-                    <h3 class="text-xl font-bold mb-6">Links Rápidos</h3>
-                    <ul class="space-y-4">
-                        <li><a href="/" class="text-neutral-light/90 hover:text-white transition-colors">Início</a></li>
-                        <li><a href="/#sobre" class="text-neutral-light/90 hover:text-white transition-colors">Sobre</a></li>
-                        <li><a href="/#mapa" class="text-neutral-light/90 hover:text-white transition-colors">Mapa</a></li>
-                        <li><a href="/#contato" class="text-neutral-light/90 hover:text-white transition-colors">Contato</a></li>
-                        <li><a href="/autores.html" class="text-neutral-light/90 hover:text-white transition-colors">Autores</a></li>
-                    </ul>
-                </div>
-
-                <!-- Contato -->
-                <div class="lg:col-span-2">
-                    <h3 class="text-xl font-bold mb-6">Contato</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-center space-x-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                            </svg>
-                            <span>(16) 99295-2093</span>
-                        </li>
-                        <li class="flex items-center space-x-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                                <polyline points="22,6 12,13 2,6" />
-                            </svg>
-                            <span>miguelmoura@hortalis.com.br</span>
-                        </li>
-                        <li class="flex items-center space-x-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                                <circle cx="12" cy="10" r="3" />
-                            </svg>
-                            <span>Matão, SP - Brasil</span>
-                        </li>
-                    </ul>
-                </div>
+                <ul class="nav nav-pills justify-content-center gap-2" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active px-4 py-2 rounded-3" id="primeiros-passos-tab" data-bs-toggle="tab" data-bs-target="#primeiros-passos" type="button" role="tab" aria-controls="primeiros-passos" aria-selected="true" style="background-color: #007C46; color: white;">Primeiros Passos</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-4 py-2 rounded-3" id="guias-tab" data-bs-toggle="tab" data-bs-target="#guias" type="button" role="tab" aria-controls="guias" aria-selected="false" style="background-color: rgba(76, 175, 80, 0.1); color: #007C46;">Guias Práticos</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-4 py-2 rounded-3" id="dicas-tab" data-bs-toggle="tab" data-bs-target="#dicas" type="button" role="tab" aria-controls="dicas" aria-selected="false" style="background-color: rgba(76, 175, 80, 0.1); color: #007C46;">Dicas Sazonais</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link px-4 py-2 rounded-3" id="glossario-tab" data-bs-toggle="tab" data-bs-target="#glossario" type="button" role="tab" aria-controls="glossario" aria-selected="false" style="background-color: rgba(76, 175, 80, 0.1); color: #007C46;">Glossário</button>
+                    </li>
+                </ul>
             </div>
         </div>
-    </footer>
+    </section>
 
-    <script src="/js/script.js" type="module"></script>
-    <script src="/js/tutoriais.js" type="module"></script>
-    <script>
-      window.switchTab = switchTab;
-      window.toggleCalendarioMes = toggleCalendarioMes;
-      window.handleNewsletterSubmit = handleNewsletterSubmit;
-    </script>
-</body>
-</html>
+    <section class="py-5">
+        <div class="container">
+            <div class="tab-content" id="myTabContent">
+
+                <div class="tab-pane fade show active" id="primeiros-passos" role="tabpanel" aria-labelledby="primeiros-passos-tab">
+                    <div class="col-lg-10 mx-auto">
+                        <div class="row g-5 align-items-center mb-5">
+                            <div class="col-md-6">
+                                <h2 class="fw-bold mb-4" style="font-family: 'Raleway', sans-serif; font-size: 2.2rem;">Começando sua Horta</h2>
+                                <div class="vstack gap-4">
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div style="width: 48px; height: 48px; border-radius: 0.75rem; background-color: rgba(76, 175, 80, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 0;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2"><path d="M12 2v2m0 16v2M4 12H2m20 0h-2m-2.05-6.95l-1.41 1.41M5.46 18.54l-1.41 1.41m0-14l1.41 1.41m11.13 11.13l1.41 1.41M12 7a5 5 0 0 0-5 5 5 5 0 0 0 5 5 5 5 0 0 0 5-5 5 5 0 0 0-5-5z" /></svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="h5 fw-semibold mb-1">Escolha o Local</h3>
+                                            <p class="text-secondary">Procure um espaço com boa iluminação natural, pelo menos 6 horas de sol por dia.</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div style="width: 48px; height: 48px; border-radius: 0.75rem; background-color: rgba(76, 175, 80, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 0;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="h5 fw-semibold mb-1">Prepare o Solo</h3>
+                                            <p class="text-secondary">Use substrato de qualidade e adicione composto orgânico para enriquecer a terra.</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div style="width: 48px; height: 48px; border-radius: 0.75rem; background-color: rgba(76, 175, 80, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 0;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                                        </div>
+                                        <div>
+                                            <h3 class="h5 fw-semibold mb-1">Escolha as Plantas</h3>
+                                            <p class="text-secondary">Comece com plantas fáceis de cultivar, como alface, cebolinha e hortelã.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <img src="https://images.unsplash.com/photo-1622383563227-04401ab4e5ea?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Iniciando uma Horta" class="img-fluid rounded-4 shadow-lg w-100" style="object-fit: cover; height: 100%; min-height: 400px;" />
+                            </div>
+                        </div>
+
+                        <div class="card shadow-lg border-0 mb-5" style="border-radius: 1rem; overflow: hidden;">
+                            <div class="video-container">
+                                <iframe src="https://www.youtube.com/embed/8IqecvY3IWg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                            <div class="card-body p-4">
+                                <h3 class="fw-bold" style="font-family: 'Raleway', sans-serif;">Tutorial: Como Fazer uma Horta em Casa</h3>
+                                <p class="text-secondary">Neste vídeo completo, você aprenderá passo a passo como criar sua própria horta em casa. Desde a escolha do local até o plantio das primeiras mudas, todas as dicas essenciais para começar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="guias" role="tabpanel" aria-labelledby="guias-tab"><div class="text-center p-5">Conteúdo da aba "Guias Práticos"</div></div>
+                <div class="tab-pane fade" id="dicas" role="tabpanel" aria-labelledby="dicas-tab"><div class="text-center p-5">Conteúdo da aba "Dicas Sazonais"</div></div>
+                <div class="tab-pane fade" id="glossario" role="tabpanel" aria-labelledby="glossario-tab"><div class="text-center p-5">Conteúdo da aba "Glossário"</div></div>
+
+            </div>
+        </div>
+    </section>
+
+    <section style="background-color: rgba(76, 175, 80, 0.05); padding: 4rem 0;">
+        <div class="container">
+            <div class="col-lg-7 mx-auto text-center">
+                <h2 class="h1 fw-bold mb-3" style="font-family: 'Raleway', sans-serif;">Receba Dicas Semanais</h2>
+                <p class="text-secondary mb-4">
+                    Inscreva-se para receber nossas melhores dicas de jardinagem, calendários de plantio atualizados e novidades do mundo das hortas urbanas.
+                </p>
+                <form class="d-flex flex-column flex-sm-row gap-2">
+                    <input type="email" name="email" placeholder="Seu melhor e-mail" class="form-control form-control-lg" required />
+                    <button type="submit" class="btn btn-lg text-white" style="background-color: #4CAF50;">Inscrever</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>

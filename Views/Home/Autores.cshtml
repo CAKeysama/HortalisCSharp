@@ -1,65 +1,162 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-</head>
-<body>
-    <h1>Conheça os Autores</h1>
-    <p>Celebramos as pessoas por tr?s do Hortalis. Estes s?o os cora??es e mentes que tornam o projeto poss?vel.</p>
+@{
+    ViewData["Title"] = "Autores";
+}
 
+<div class="container my-5" style="font-family: 'Montserrat', sans-serif; max-width: 1200px;">
 
-    <article>
-        <img src="./assets/Gustavo.png" alt="Gustavo D. Silva" />
-        <h3>Gustavo D. Silva</h3>
-        <p>FrontEnd/UI UX</p>
-        <p>Sou programador full-stack apaixonado por tecnologia, inova??o e empreendedorismo. Atuo no desenvolvimento de projetos digitais que unem criatividade, impacto social e solu??es pr?ticas para o dia a dia.</p>
-        <a href="https://www.linkedin.com/in/gustavo-d-silva-33b044228">LinkedIn</a>
-        <a href="https://www.instagram.com/gustvo_d">Instagram</a>
-    </article>
+    <div class="text-center py-5" style="background-color: #f1f5f8; width: 100vw; margin-left: calc(-50vw + 50%); margin-bottom: 3rem;">
+        <h1 style="font-family: 'Montserrat', sans-serif; font-weight: 700; color: #2d3436; font-size: 2.5rem;">
+            Conheça os Autores
+        </h1>
+        <p style="font-family: 'Montserrat', sans-serif; color: #636e72; font-size: 1.2rem; margin-top: 0.5rem;">
+            Celebramos as pessoas por trás do Hortalis. Estes são os corações e mentes que tornam o projeto possível.
+        </p>
+    </div>
 
-    <article>
-        <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1200&auto=format&fit=crop" alt="Miguel P. Moura" />
-        <h3>Miguel P. Moura</h3>
-        <p>Representante/MER DER</p>
-        <p>Sou um apaixonado por tecnologia, uma pessoa muito dedicada ao que faz, estudante de DSM.</p>
-        <a href="#">LinkedIn</a>
-        <a href="https://www.instagram.com/miguel_p_moura?igsh=MW93eWs4MjMxdXpzOQ==">Instagram</a>
-    </article>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
 
-    <article>
-        <img src="./assets/Carrara.jpeg" alt="Gustavo F. Carrara" />
-        <h3>Gustavo F. Carrara</h3>
-        <p>Documenta??o</p>
-        <p>Estudante DSM na FATEC, apaixonado por tecnologia, design digital, uma pessoa criativa e obstinada.</p>
-        <a href="https://www.linkedin.com/in/gustavo-carrara-623b4224a">LinkedIn</a>
-        <a href="https://www.instagram.com/gu_carrara">Instagram</a>
-    </article>
+        <!-- Gustavo Silva -->
+        <div class="col">
+            <div class="card h-100 shadow-sm" style="border-radius:15px; overflow:hidden;">
+                <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1200&auto=format&fit=crop"
+                     alt="Gustavo D. Silva"
+                     style="object-fit:cover; height:250px; width:100%;">
+                <div class="card-body">
+                    <h5 style="font-weight:600;">Gustavo D. Silva</h5>
+                    <p style="color:#00b894; font-weight:500;">FrontEnd/UI UX</p>
+                    <p style="font-size:0.95rem; color:#2d3436;">
+                        Sou programador full-stack apaixonado por tecnologia, inovação e empreendedorismo.
+                        Atuo no desenvolvimento de projetos digitais que unem criatividade, impacto social e soluções práticas para o dia a dia.
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 d-flex justify-content-center gap-3">
+                    <a href="https://www.linkedin.com/in/gustavo-d-silva-33b044228" target="_blank">
+                        <i class="bi bi-linkedin" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                    <a href="https://www.instagram.com/gustvo_d" target="_blank">
+                        <i class="bi bi-instagram" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
 
-    <article>
-        <img src="./assets/Pedro.jpg" alt="Pedro H. P. Penitenti" />
-        <h3>Pedro H. P. Penitenti</h3>
-        <p>Frontend/Documenta??o</p>
-        <p>Atualmente cursando DSM na Fatec Mat?o, estudando tanto o lado t?cnico quanto o l?gico por tr?s do desenvolvimento de aplica??es eficientes e escal?veis.</p>
-        <a href="https://www.linkedin.com/in/pedro-penitenti-952416381?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app">LinkedIn</a>
-        <a href="https://www.instagram.com/p.penitenti/#">Instagram</a>
-    </article>
+        <!-- Miguel Moura -->
+        <div class="col">
+            <div class="card h-100 shadow-sm" style="border-radius:15px; overflow:hidden;">
+                <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1200&auto=format&fit=crop"
+                     alt="Miguel P. Moura"
+                     style="object-fit:cover; height:250px; width:100%;">
+                <div class="card-body">
+                    <h5 style="font-weight:600;">Miguel P. Moura</h5>
+                    <p style="color:#00b894; font-weight:500;">Representante/MER DER</p>
+                    <p style="font-size:0.95rem; color:#2d3436;">
+                        Sou um apaixonado por tecnologia, uma pessoa muito dedicada ao que faz, estudante de DSM.
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 d-flex justify-content-center gap-3">
+                    <a href="#"><i class="bi bi-linkedin" style="font-size:1.5rem; color:#00b894;"></i></a>
+                    <a href="https://www.instagram.com/miguel_p_moura?igsh=MW93eWs4MjMxdXpzOQ==" target="_blank">
+                        <i class="bi bi-instagram" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
 
-    <article>
-        <img src="./assets/Guilherme.jpg" alt="Guilherme W. Pedroso" />
-        <h3>Guilherme W. Pedroso</h3>
-        <p>Frontend/Documenta??o</p>
-        <p>Estudante de Desenvolvimento de Software Multiplataforma na FATEC. Atualmente em forma??o na ?rea de tecnologia com foco em desenvolvimento de aplica??es para web, mobile e desktop. Interessado(a) em aprender novas linguagens.</p>
-        <a href="https://www.linkedin.com/in/guilherme-pedroso-1569a5365/">LinkedIn</a>
-        <a href="https://www.instagram.com/guipedroso__/#">Instagram</a>
-    </article>
+        <!-- Gustavo Carrara -->
+        <div class="col">
+            <div class="card h-100 shadow-sm" style="border-radius:15px; overflow:hidden;">
+                <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1200&auto=format&fit=crop"
+                     alt="Gustavo F. Carrara"
+                     style="object-fit:cover; height:250px; width:100%;">
+                <div class="card-body">
+                    <h5 style="font-weight:600;">Gustavo F. Carrara</h5>
+                    <p style="color:#00b894; font-weight:500;">Documentação</p>
+                    <p style="font-size:0.95rem; color:#2d3436;">
+                        Estudante DSM na FATEC, apaixonado por tecnologia, design digital, uma pessoa criativa e obstinada.
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 d-flex justify-content-center gap-3">
+                    <a href="https://www.linkedin.com/in/gustavo-carrara-623b4224a" target="_blank">
+                        <i class="bi bi-linkedin" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                    <a href="https://www.instagram.com/gu_carrara" target="_blank">
+                        <i class="bi bi-instagram" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
 
-    <article>
-        <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=1200&auto=format&fit=crop" alt="Luiz Ricardo Ramos" />
-        <h3>Luiz Ricardo Ramos</h3>
-        <p>Desenvolvedor Front-End.</p>
-        <p>Cursando o curso de Desenvolvimento e Software Multiplataforma na FATEC. Em forma??o na ?rea de desenvolvimento de WebPages(Mobile e Desktop).</p>
-        <a href="https://www.linkedin.com/in/luiz-ramos-8468a4350?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app">LinkedIn</a>
-        <a href="https://www.instagram.com/luizramos3407?igsh=NTBzY295YzB2M3o0">Instagram</a>
-    </article>
+        <!-- Pedro -->
+        <div class="col">
+            <div class="card h-100 shadow-sm" style="border-radius:15px; overflow:hidden;">
+                <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1200&auto=format&fit=crop"
+                     alt="Pedro H. P. Penitenti"
+                     style="object-fit:cover; height:250px; width:100%;">
+                <div class="card-body">
+                    <h5 style="font-weight:600;">Pedro H. P. Penitenti</h5>
+                    <p style="color:#00b894; font-weight:500;">Frontend/Documentação</p>
+                    <p style="font-size:0.95rem; color:#2d3436;">
+                        Atualmente cursando DSM na Fatec Matão, estudando tanto o lado técnico quanto o lógico por trás do desenvolvimento de aplicações eficientes e escaláveis.
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 d-flex justify-content-center gap-3">
+                    <a href="https://www.linkedin.com/in/pedro-penitenti-952416381?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank">
+                        <i class="bi bi-linkedin" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                    <a href="https://www.instagram.com/p.penitenti/#" target="_blank">
+                        <i class="bi bi-instagram" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
 
-</body>
-</html>
+        <!-- Guilherme -->
+        <div class="col">
+            <div class="card h-100 shadow-sm" style="border-radius:15px; overflow:hidden;">
+                <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1200&auto=format&fit=crop"
+                     alt="Guilherme W. Pedroso"
+                     style="object-fit:cover; height:250px; width:100%;">
+                <div class="card-body">
+                    <h5 style="font-weight:600;">Guilherme W. Pedroso</h5>
+                    <p style="color:#00b894; font-weight:500;">Frontend/Documentação</p>
+                    <p style="font-size:0.95rem; color:#2d3436;">
+                        Estudante de Desenvolvimento de Software Multiplataforma na FATEC. Atualmente em formação na área de tecnologia com foco em desenvolvimento de aplicações para web, mobile e desktop. Interessado(a) em aprender novas linguagens.
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 d-flex justify-content-center gap-3">
+                    <a href="https://www.linkedin.com/in/guilherme-pedroso-1569a5365/" target="_blank">
+                        <i class="bi bi-linkedin" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                    <a href="https://www.instagram.com/guipedroso__/#" target="_blank">
+                        <i class="bi bi-instagram" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Luiz -->
+        <div class="col">
+            <div class="card h-100 shadow-sm" style="border-radius:15px; overflow:hidden;">
+                <img src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?q=80&w=1200&auto=format&fit=crop"
+                     alt="Luiz Ricardo Ramos"
+                     style="object-fit:cover; height:250px; width:100%;">
+                <div class="card-body">
+                    <h5 style="font-weight:600;">Luiz Ricardo Ramos</h5>
+                    <p style="color:#00b894; font-weight:500;">Desenvolvedor Front-End</p>
+                    <p style="font-size:0.95rem; color:#2d3436;">
+                        Cursando o curso de Desenvolvimento e Software Multiplataforma na FATEC. Em formação na área de desenvolvimento de WebPages (Mobile e Desktop).
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-0 d-flex justify-content-center gap-3">
+                    <a href="https://www.linkedin.com/in/luiz-ramos-8468a4350?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank">
+                        <i class="bi bi-linkedin" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                    <a href="https://www.instagram.com/luizramos3407?igsh=NTBzY295YzB2M3o0" target="_blank">
+                        <i class="bi bi-instagram" style="font-size:1.5rem; color:#00b894;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
