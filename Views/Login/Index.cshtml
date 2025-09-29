@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "Login / Cadastro";
+}
+
+<div class="container" style="max-width: 500px; margin-top: 60px;">
+    <div class="text-center mb-4">
+        <img src="~/Content/logo.png" alt="Logo Hortalis" style="height: 45px;">
+    </div>
+
+    <!-- Abas -->
+    <ul class="nav nav-tabs justify-content-center" id="loginTabs" role="tablist" style="border-bottom: 1px solid #e5e7eb;">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="login-tab" data-bs-toggle="tab" href="#login" role="tab" style="color:#000; font-weight:600;">Entrar</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="cadastro-tab" data-bs-toggle="tab" href="#cadastro" role="tab" style="color:#047857; font-weight:600;">Cadastro</a>
+        </li>
+    </ul>
+
+    <!-- Conteúdo -->
+    <div class="tab-content p-4" id="loginTabsContent" style="border: 1px solid #e5e7eb; border-top: 0;">
+
+        <!-- LOGIN -->
+        <div class="tab-pane fade show active" id="login" role="tabpanel">
+            @if (ViewBag.Erro != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Erro</div>
+            }
+
+            <form method="post" action="/Login/Entrar">
+                <div class="form-group mb-3">
+                    <input name="email" type="email" placeholder="Email" class="form-control" required
+                           style="border:1px solid #d1d5db; border-radius:8px; height:50px;">
+                </div>
+                <div class="form-group mb-2">
+                    <input type="password" name="senha" placeholder="Senha" class="form-control" required
+                           style="border:1px solid #d1d5db; border-radius:8px; height:50px;">
+                </div>
+                <div class="mb-3 text-start">
+                    <a href="#" style="font-size:14px; color:#6b7280;">Esqueceu a senha ?</a>
+                </div>
+                <button type="submit" class="btn btn-success w-100"
+                        style="background-color:#047857; border:none; border-radius:8px; height:45px; font-weight:600;">
+                    Entrar
+                </button>
+            </form>
+
+            <div class="text-center my-3" style="color:#6b7280;">Entrar com</div>
+            <div class="d-flex justify-content-between">
+                <button class="btn w-50 me-2" style="background-color:#f3f4f6; border-radius:8px; font-weight:600;">
+                    Entrar com o Google
+                </button>
+                <button class="btn w-50" style="background-color:#f3f4f6; border-radius:8px; font-weight:600;">
+                    Entrar com o Facebook
+                </button>
+            </div>
+        </div>
+
+        <!-- CADASTRO -->
+        <div class="tab-pane fade" id="cadastro" role="tabpanel">
+            @if (TempData["Cadastro"] != null)
+            {
+                <div class="alert alert-success">@TempData["Cadastro"]</div>
+            }
+
+            <form method="post" action="/Login/Cadastrar">
+                <div class="form-group mb-3">
+                    <input name="nome" placeholder="Nome" class="form-control" required
+                           style="border:1px solid #d1d5db; border-radius:8px; height:50px;">
+                </div>
+                <div class="form-group mb-3">
+                    <input name="email" type="email" placeholder="Email" class="form-control" required
+                           style="border:1px solid #d1d5db; border-radius:8px; height:50px;">
+                </div>
+                <div class="form-group mb-2">
+                    <input type="password" name="senha" placeholder="Senha" class="form-control" required
+                           style="border:1px solid #d1d5db; border-radius:8px; height:50px;">
+                </div>
+                <div class="mb-3 text-start">
+                    <a href="#" style="font-size:14px; color:#6b7280;">Esqueceu a senha ?</a>
+                </div>
+                <button type="submit" class="btn btn-success w-100"
+                        style="background-color:#047857; border:none; border-radius:8px; height:45px; font-weight:600;">
+                    Entrar
+                </button>
+            </form>
+
+            <div class="text-center my-3" style="color:#6b7280;">Entrar com</div>
+            <div class="d-flex justify-content-between">
+                <button class="btn w-50 me-2" style="background-color:#f3f4f6; border-radius:8px; font-weight:600;">
+                    Entrar com o Google
+                </button>
+                <button class="btn w-50" style="background-color:#f3f4f6; border-radius:8px; font-weight:600;">
+                    Entrar com o Facebook
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
