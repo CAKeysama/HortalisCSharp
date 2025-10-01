@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
 using System.Collections.Generic;
 using System.Linq;
-
 
 namespace SeuProjeto.Controllers
 {
@@ -46,7 +44,8 @@ namespace SeuProjeto.Controllers
         }
     }
 
-    internal class Usuario
+    // Adicione a definição da classe Usuario se ela não existir em outro arquivo
+    public class Usuario
     {
         public string Nome { get; set; }
         public string Email { get; set; }
