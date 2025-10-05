@@ -1,33 +1,53 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using HortalisCSharp.Data;
+using HortalisCSharp.Models;
+using System.Security.Claims;
 
-namespace SeuProjeto.Controllers
+namespace HortalisCSharp.Controllers
 {
     public class LoginController : Controller
     {
-        // Mock de usuários
-        private List<Usuario> usuariosMock = new List<Usuario>
+        private readonly AppDbContext _db;
+        private readonly IPasswordHasher<Usuario> _hasher;
+
+        public LoginController(AppDbContext db, IPasswordHasher<Usuario> hasher)
         {
-            new Usuario { Nome = "João Silva", Email = "joao@teste.com", Senha = "123456" },
-            new Usuario { Nome = "Maria Souza", Email = "maria@teste.com", Senha = "654321" }
-        };
+            _db = db;
+            _hasher = hasher;
+        }
 
         // GET: Login
-        public ActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
 
         // POST: Login
         [HttpPost]
-        public ActionResult Entrar(string email, string senha)
+        public async Task<IActionResult> Entrar(string email, string senha)
         {
-            var usuario = usuariosMock.FirstOrDefault(u => u.Email == email && u.Senha == senha);
+            var usuario = await _db.Usuarios.SingleOrDefaultAsync(u => u.Email == email);
             if (usuario != null)
             {
-                TempData["UsuarioLogado"] = usuario.Nome;
-                return RedirectToAction("Index", "Home");
+                var result = _hasher.VerifyHashedPassword(usuario, usuario.SenhaHash, senha);
+                if (result == PasswordVerificationResult.Success)
+                {
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                        new Claim(ClaimTypes.Name, usuario.Nome),
+                        new Claim(ClaimTypes.Email, usuario.Email)
+                    };
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
+
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+                        new AuthenticationProperties { IsPersistent = true });
+
+                    TempData["UsuarioLogado"] = usuario.Nome;
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
             ViewBag.Erro = "Email ou senha inválidos.";
@@ -36,19 +56,22 @@ namespace SeuProjeto.Controllers
 
         // POST: Cadastro
         [HttpPost]
-        public ActionResult Cadastrar(string nome, string email, string senha)
+        public async Task<IActionResult> Cadastrar(string nome, string email, string senha)
         {
-            // Apenas simula cadastro sem salvar
-            TempData["Cadastro"] = $"Usuário {nome} cadastrado (simulação).";
+            if (await _db.Usuarios.AnyAsync(u => u.Email == email))
+            {
+                TempData["Cadastro"] = "Email já cadastrado.";
+                return RedirectToAction("Index");
+            }
+
+            var usuario = new Usuario { Nome = nome, Email = email };
+            usuario.SenhaHash = _hasher.HashPassword(usuario, senha);
+
+            _db.Usuarios.Add(usuario);
+            await _db.SaveChangesAsync();
+
+            TempData["Cadastro"] = $"Usuário {nome} cadastrado com sucesso.";
             return RedirectToAction("Index");
         }
-    }
-
-    // Adicione a definição da classe Usuario se ela não existir em outro arquivo
-    public class Usuario
-    {
-        public string Nome { get; set; }
-        public string Email { get; set; }
-        public string Senha { get; set; }
     }
 }
