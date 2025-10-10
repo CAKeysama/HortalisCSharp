@@ -37,7 +37,8 @@ namespace HortalisCSharp.Controllers
                     {
                         new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                         new Claim(ClaimTypes.Name, usuario.Nome),
-                        new Claim(ClaimTypes.Email, usuario.Email)
+                        new Claim(ClaimTypes.Email, usuario.Email),
+                        new Claim(ClaimTypes.Role, usuario.Papel.ToString()) // adiciona a role como claim
                     };
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     var principal = new ClaimsPrincipal(identity);
@@ -56,7 +57,7 @@ namespace HortalisCSharp.Controllers
 
         // POST: Cadastro
         [HttpPost]
-        public async Task<IActionResult> Cadastrar(string nome, string email, string senha)
+        public async Task<IActionResult> Cadastrar(string nome, string email, string senha, int papel = 0)
         {
             if (await _db.Usuarios.AnyAsync(u => u.Email == email))
             {
@@ -64,7 +65,16 @@ namespace HortalisCSharp.Controllers
                 return RedirectToAction("Index");
             }
 
-            var usuario = new Usuario { Nome = nome, Email = email };
+            // normaliza o valor recebido (0=Padrao, 1=Gerente, 2=Administrador)
+            if (!Enum.IsDefined(typeof(PapelUsuario), papel))
+                papel = (int)PapelUsuario.Padrao;
+
+            var usuario = new Usuario
+            {
+                Nome = nome,
+                Email = email,
+                Papel = (PapelUsuario)papel
+            };
             usuario.SenhaHash = _hasher.HashPassword(usuario, senha);
 
             _db.Usuarios.Add(usuario);

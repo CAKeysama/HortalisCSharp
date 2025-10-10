@@ -1,0 +1,23 @@
+@page "{id:int}"
+@model HortalisCSharp.Pages.Hortas.DeleteModel
+@{
+    Layout = "/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Excluir Horta";
+    ViewData["HideFooter"] = true;
+}
+
+<div class="container py-4">
+    <h2 class="fw-bold text-danger mb-3">Excluir Horta</h2>
+    <div class="alert alert-warning">
+        Tem certeza que deseja excluir a horta "<strong>@Model.Horta?.Nome</strong>"? Esta ação não pode ser desfeita.
+    </div>
+    <form method="post">
+        <input type="hidden" asp-for="Id" />
+        <div class="d-flex gap-2">
+            <button class="btn btn-danger" type="submit">
+                <i class="bi bi-trash me-1"></i> Excluir
+            </button>
+            <a asp-page="Index" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

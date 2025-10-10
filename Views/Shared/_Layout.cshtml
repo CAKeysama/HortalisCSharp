@@ -7,6 +7,10 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <link rel="stylesheet" href="~/css/site.css" />
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Raleway:wght@600;700&display=swap" rel="stylesheet">
@@ -52,33 +56,36 @@
         @RenderBody()
     </main>
 
-    <!-- Footer -->
-    <footer class="text-light py-5 mt-5" style="background-color:#007C46;">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5>Sobre o Hortalis</h5>
-                    <p>Conectamos pessoas a hortas comunitárias para promover alimentação saudável, sustentabilidade e integração social.</p>
-                </div>
-                <div class="col-md-4">
-                    <h5>Links Rápidos</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="#inicio" class="text-light text-decoration-none link-hover">Início</a></li>
-                        <li><a href="#faq" class="text-light text-decoration-none link-hover">Dúvidas</a></li>
-                        <li><a href="#mapa" class="text-light text-decoration-none link-hover">Mapa</a></li>
-                        <li><a href="#contato" class="text-light text-decoration-none link-hover">Contato</a></li>
-                        <li><a href="/Login/Index" class="text-light text-decoration-none link-hover">Login</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>Contato</h5>
-                    <p>(16) 9 9268-8721</p>
-                    <p>suporte@hortalis.com.br</p>
-                    <p>Matão, SP - Brasil</p>
+    @if (!(ViewData["HideFooter"] as bool? == true))
+    {
+        <!-- Footer -->
+        <footer class="text-light py-5 mt-5" style="background-color:#007C46;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>Sobre o Hortalis</h5>
+                        <p>Conectamos pessoas a hortas comunitárias para promover alimentação saudável, sustentabilidade e integração social.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Links Rápidos</h5>
+                        <ul class="list-unstyled">
+                            <li><a href="#inicio" class="text-light text-decoration-none link-hover">Início</a></li>
+                            <li><a href="#faq" class="text-light text-decoration-none link-hover">Dúvidas</a></li>
+                            <li><a href="#mapa" class="text-light text-decoration-none link-hover">Mapa</a></li>
+                            <li><a href="#contato" class="text-light text-decoration-none link-hover">Contato</a></li>
+                            <li><a href="/Login/Index" class="text-light text-decoration-none link-hover">Login</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Contato</h5>
+                        <p>(16) 9 9268-8721</p>
+                        <p>suporte@hortalis.com.br</p>
+                        <p>Matão, SP - Brasil</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </footer>
+        </footer>
+    }
 
 @*         <!-- Modal de usuário autenticado -->
         <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
@@ -114,7 +121,8 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="~/js/script.js" type="module"></script>
+    <script src="~/js/site.js"></script>
+    @RenderSection("Scripts", required: false)
 
 </body>
 </html>

@@ -13,11 +13,14 @@ namespace HortalisCSharp
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews(); // MVC (se usar Razor Pages, também adicione: AddRazorPages)
+            builder.Services.AddControllersWithViews(); // MVC
+            builder.Services.AddRazorPages(); // Razor Pages
+
             builder.Services.AddDbContext<AppDbContext>(opt =>
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddScoped<IPasswordHasher<Usuario>, PasswordHasher<Usuario>>();
+            builder.Services.AddScoped<HortalisCSharp.Services.IHortaAuthorizationService, HortalisCSharp.Services.HortaAuthorizationService>();
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(o =>
@@ -51,8 +54,8 @@ namespace HortalisCSharp
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapDefaultControllerRoute();
-            // app.MapRazorPages(); // caso use Razor Pages também
+            app.MapDefaultControllerRoute(); // MVC
+            app.MapRazorPages(); // Razor Pages
 
             app.Run();
         }
