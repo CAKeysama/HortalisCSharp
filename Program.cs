@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using HortalisCSharp.Data;
@@ -12,9 +13,9 @@ namespace HortalisCSharp
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddControllersWithViews(); // MVC
-            builder.Services.AddRazorPages(); // Razor Pages
+            // MVC + Razor Pages
+            builder.Services.AddControllersWithViews();
+            builder.Services.AddRazorPages();
 
             builder.Services.AddDbContext<AppDbContext>(opt =>
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -31,16 +32,33 @@ namespace HortalisCSharp
                     o.SlidingExpiration = true;
                 });
 
+            // Autorization: exige login por padrão e define política de Admin
+            builder.Services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Administrador"));
+            });
+
+            // Sessão
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromHours(2);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
             var app = builder.Build();
 
-            // Aplica migrations automaticamente em dev/execu��o
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 db.Database.Migrate();
             }
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -51,11 +69,14 @@ namespace HortalisCSharp
             app.UseStaticFiles();
 
             app.UseRouting();
+
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapDefaultControllerRoute(); // MVC
-            app.MapRazorPages(); // Razor Pages
+            app.UseSession();
+
+            app.MapDefaultControllerRoute();
+            app.MapRazorPages();
 
             app.Run();
         }

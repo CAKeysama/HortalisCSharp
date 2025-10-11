@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Minha Conta";
+    var name = (ViewBag.Name as string) ?? string.Empty;
+    var email = (ViewBag.Email as string) ?? string.Empty;
+
+    DateTime? createdAt = null;
+    if (ViewBag.CreatedAt != null)
+    {
+        createdAt = (DateTime)ViewBag.CreatedAt;
+    }
+}
+
+<div class="container" style="max-width: 720px; margin-top: 90px;">
+    <div class="text-center mb-4">
+        <img src="~/Logo_Verde.svg" alt="Logo Hortalis" style="height:48px;">
+    </div>
+
+    @if (TempData["ContaMsg"] != null)
+    {
+        <div class="alert alert-success">@TempData["ContaMsg"]</div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header text-white" style="background-color:#007C46;">
+            <h5 class="mb-0">Minha conta</h5>
+        </div>
+        <div class="card-body">
+            <h3 class="fw-semibold mb-1">Olá, @name</h3>
+            <hr class="my-3" />
+
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <div class="small text-muted">Email</div>
+                    <div class="fw-semibold">@(!string.IsNullOrWhiteSpace(email) ? email : "N/D")</div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="small text-muted">Usuário desde</div>
+                    <div class="fw-semibold">
+                        @(createdAt.HasValue ? createdAt.Value.ToLocalTime().ToString("dd/MM/yyyy") : "N/D")
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid d-md-flex gap-2 mt-4">
+                <a class="btn btn-outline-success" href="/Login/TrocarSenha">
+                    <i class="bi bi-shield-lock me-1"></i> Trocar a senha
+                </a>
+                <a class="btn btn-outline-danger" href="/Login/Sair">
+                    <i class="bi bi-box-arrow-right me-1"></i> Sair da conta
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

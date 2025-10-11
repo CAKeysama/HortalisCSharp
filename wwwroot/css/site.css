@@ -8,6 +8,9 @@ body {
     background-color: #F1F1F1;
     color: #333;
     line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .link-hover:hover {
@@ -319,3 +322,8 @@ p, li, label, input, textarea, button, .form-control, .lead {
         height: 100%;
         border-radius: 0.5rem;
     }
+/* Sticky footer layout */
+html, body { height: 100%; }
+body { min-height: 100vh; display: flex; flex-direction: column; }
+main { flex: 1 0 auto; } /* ocupa o espaço entre header fixo e o footer */
+footer { margin-top: auto; }

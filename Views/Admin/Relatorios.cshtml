@@ -1,0 +1,70 @@
+@model HortalisCSharp.Models.ViewModels.RelatoriosViewModel
+@{
+    ViewData["Title"] = "Relatórios";
+}
+
+<div class="container" style="max-width: 980px; margin-top: 90px;">
+    <div class="text-center mb-4">
+        <h2 class="mt-3 fw-bold">Relatórios</h2>
+        <div class="text-muted">Visão geral do sistema</div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="small text-muted">Hortas cadastradas</div>
+                            <div class="display-6 fw-bold">@Model.TotalHortas</div>
+                        </div>
+                        <div class="text-success">
+                            <i class="bi bi-flower1" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 small text-muted">
+                    Total de registros na base
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="small text-muted">Produtos disponíveis</div>
+                            <div class="display-6 fw-bold">@Model.TotalProdutos</div>
+                        </div>
+                        <div class="text-success">
+                            <i class="bi bi-basket2" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 small text-muted">
+                    Distintos via STRING_SPLIT
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="small text-muted">Usuários</div>
+                            <div class="display-6 fw-bold">@Model.TotalUsuarios</div>
+                        </div>
+                        <div class="text-success">
+                            <i class="bi bi-people" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 small text-muted">
+                    Contagem total de usuários
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

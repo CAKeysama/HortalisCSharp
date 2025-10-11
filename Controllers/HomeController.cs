@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using HortalisCSharp.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HortalisCSharp.Controllers
 {
@@ -13,16 +14,19 @@ namespace HortalisCSharp.Controllers
             _logger = logger;
         }
 
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View();
         }
 
+        [AllowAnonymous]
         public IActionResult Tutoriais()
         {
             return View();
         }
 
+        [AllowAnonymous]
         public IActionResult Autores()
         {
             return View();

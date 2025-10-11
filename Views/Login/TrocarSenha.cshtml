@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Trocar senha";
+}
+
+<div class="container" style="max-width: 520px; margin-top: 90px;">
+    <div class="text-center mb-4">
+        <img src="~/Logo_Verde.svg" alt="Logo Hortalis" style="height:48px;">
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header text-white" style="background-color:#007C46;">
+            <h5 class="mb-0">Trocar a senha</h5>
+        </div>
+        <div class="card-body">
+            @if (ViewBag.Erro != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Erro</div>
+            }
+
+            <form method="post" action="/Login/TrocarSenha">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Senha atual</label>
+                    <input type="password" name="senhaAtual" class="form-control" autocomplete="current-password" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nova senha</label>
+                    <input type="password" name="novaSenha" class="form-control" autocomplete="new-password" minlength="8" required />
+                    <div class="form-text">Mínimo de 8 caracteres.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Confirmar nova senha</label>
+                    <input type="password" name="confirmarSenha" class="form-control" autocomplete="new-password" minlength="8" required />
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-shield-lock me-1"></i> Salvar nova senha
+                    </button>
+                    <a class="btn btn-outline-secondary" href="/Login/Conta">
+                        Voltar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
