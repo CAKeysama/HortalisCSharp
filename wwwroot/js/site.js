@@ -26,7 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 map.setView(userPos, 14);
                 L.marker(userPos).addTo(map).bindPopup('Você está aqui');
             },
-            () => { /* silencioso se negar permissão */ },
+            err => {
+                alert('Não foi possível acessar sua localização. Usando localização padrão.');
+                map.setView(defaultCenter, 13);
+            },
             { enableHighAccuracy: true, timeout: 5000, maximumAge: 300000 }
         );
     }
