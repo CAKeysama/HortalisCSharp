@@ -31,11 +31,20 @@
                 <textarea asp-for="Input.Descricao" rows="4" class="form-control"></textarea>
                 <span asp-validation-for="Input.Descricao" class="text-danger"></span>
             </div>
+
+            <!-- UI produtos (mesma lógica do Create) -->
             <div class="col-md-6">
-                <label asp-for="Input.Produtos" class="form-label"></label>
-                <input asp-for="Input.Produtos" class="form-control" />
-                <span asp-validation-for="Input.Produtos" class="text-danger"></span>
+                <label class="form-label">Produtos</label>
+                <div id="produtos-selector" class="form-control p-2" style="min-height:46px;">
+                    <div id="produtos-chips" class="d-flex flex-wrap gap-1"></div>
+                    <input id="produto-input" type="text" class="border-0" style="outline:none;min-width:120px" placeholder="Digite para buscar / adicionar..." />
+                </div>
+                <div id="produto-suggestions" class="list-group mt-1 position-absolute" style="z-index:1050; display:none; max-width:400px;"></div>
+                <input type="hidden" asp-for="ProdutoNomes" />
+                <span asp-validation-for="ProdutoNomes" class="text-danger"></span>
+                <div class="form-text">Escolha produtos existentes ou adicione novos.</div>
             </div>
+
             <div class="col-md-6">
                 <label asp-for="Input.Foto" class="form-label"></label>
                 <input asp-for="Input.Foto" class="form-control" />
@@ -58,4 +67,111 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Reutiliza o mesmo script do Create (mantendo escopo)
+        (function(){
+            const input = document.getElementById('produto-input');
+            const suggestions = document.getElementById('produto-suggestions');
+            const chips = document.getElementById('produtos-chips');
+            const hidden = document.querySelector('input[name="ProdutoNomes"]');
+
+            let available = [];
+            let selected = [];
+
+            function renderHidden(){ hidden.value = selected.join(','); }
+
+            function renderChips(){
+                chips.innerHTML = '';
+                selected.forEach((s, idx) => {
+                    const span = document.createElement('span');
+                    span.className = 'badge bg-success text-white d-inline-flex align-items-center px-2 py-1';
+                    span.style.marginRight = '4px';
+                    span.innerHTML = `${s} <button type="button" data-idx="${idx}" class="btn-close btn-close-white btn-sm ms-2" aria-label="Remover"></button>`;
+                    chips.appendChild(span);
+                });
+            }
+
+            async function fetchSuggestions(q){
+                if(!q) { suggestions.style.display='none'; return; }
+                try {
+                    const res = await fetch(`/api/produtos?query=${encodeURIComponent(q)}`);
+                    const data = await res.json();
+                    available = data;
+                    renderSuggestions();
+                } catch { available = []; renderSuggestions(); }
+            }
+
+            function renderSuggestions(){
+                suggestions.innerHTML = '';
+                if(available.length === 0){
+                    const item = document.createElement('a');
+                    item.className = 'list-group-item list-group-item-action';
+                    item.textContent = `Adicionar "${input.value.trim()}"`;
+                    item.href = '#';
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        addProduct(input.value.trim());
+                        suggestions.style.display='none';
+                    });
+                    suggestions.appendChild(item);
+                    suggestions.style.display='block';
+                    return;
+                }
+
+                available.forEach(p => {
+                    const a = document.createElement('a');
+                    a.className = 'list-group-item list-group-item-action';
+                    a.href = '#';
+                    a.textContent = p.nome;
+                    a.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        addProduct(p.nome);
+                        suggestions.style.display='none';
+                    });
+                    suggestions.appendChild(a);
+                });
+                suggestions.style.display='block';
+            }
+
+            function addProduct(nome){
+                if(!nome) return;
+                nome = nome.trim();
+                if(!nome) return;
+                if(selected.some(s => s.toLowerCase() === nome.toLowerCase())) return;
+                selected.push(nome);
+                renderChips();
+                renderHidden();
+                input.value = '';
+            }
+
+            document.addEventListener('click', (e)=>{
+                if(!document.getElementById('produtos-selector').contains(e.target)) suggestions.style.display='none';
+            });
+
+            input.addEventListener('input', (e) => {
+                const q = e.target.value.trim();
+                if(q.length === 0) { suggestions.style.display='none'; return; }
+                fetchSuggestions(q);
+            });
+
+            chips.addEventListener('click', (e)=>{
+                const btn = e.target.closest('button[data-idx]');
+                if(!btn) return;
+                const idx = Number(btn.getAttribute('data-idx'));
+                selected.splice(idx,1);
+                renderChips();
+                renderHidden();
+            });
+
+            // init with existing values (server fornece ProdutoNomes)
+            (function init(){
+                const initial = hidden.value;
+                if(initial){
+                    selected = initial.split(',').map(x=>x.trim()).filter(Boolean);
+                    renderChips();
+                    renderHidden();
+                }
+            })();
+        })();
+    </script>
 }

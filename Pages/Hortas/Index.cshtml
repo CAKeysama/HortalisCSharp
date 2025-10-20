@@ -42,7 +42,14 @@
                     <tr>
                         <td>@h.Nome</td>
                         <td>@h.Latitude.ToString("F5"), @h.Longitude.ToString("F5")</td>
-                        <td>@h.Produtos</td>
+                        <td>
+                            @{
+                                var produtos = (h.HortaProdutos != null && h.HortaProdutos.Any())
+                                    ? string.Join(", ", h.HortaProdutos.Select(hp => hp.Produto?.Nome ?? ""))
+                                    : "-";
+                            }
+                            @produtos
+                        </td>
                         <td>@h.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
                         <td>@(h.Usuario?.Nome ?? "-")</td>
                         <td class="text-end">

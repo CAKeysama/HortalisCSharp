@@ -10,6 +10,9 @@ namespace HortalisCSharp.Data
         public DbSet<Usuario> Usuarios => Set<Usuario>();
         public DbSet<Horta> Hortas => Set<Horta>();
 
+        public DbSet<Produto> Produtos => Set<Produto>();
+        public DbSet<HortaProduto> HortaProdutos => Set<HortaProduto>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Usuario>()
@@ -20,7 +23,6 @@ namespace HortalisCSharp.Data
             {
                 entity.Property(h => h.Nome).IsRequired().HasMaxLength(160);
                 entity.Property(h => h.Descricao).HasMaxLength(2000);
-                entity.Property(h => h.Produtos).HasMaxLength(1000);
                 entity.Property(h => h.Foto).HasMaxLength(500);
                 entity.Property(h => h.Telefone).HasMaxLength(40);
 
@@ -31,6 +33,27 @@ namespace HortalisCSharp.Data
                       .WithMany()
                       .HasForeignKey(h => h.UsuarioId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Produto>(p =>
+            {
+                p.Property(x => x.Nome).IsRequired().HasMaxLength(120);
+                p.HasIndex(x => x.Nome).IsUnique();
+            });
+
+            modelBuilder.Entity<HortaProduto>(hp =>
+            {
+                hp.HasKey(x => new { x.HortaId, x.ProdutoId });
+
+                hp.HasOne(x => x.Horta)
+                  .WithMany(h => h.HortaProdutos)
+                  .HasForeignKey(x => x.HortaId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+                hp.HasOne(x => x.Produto)
+                  .WithMany(p => p.HortaProdutos)
+                  .HasForeignKey(x => x.ProdutoId)
+                  .OnDelete(DeleteBehavior.Cascade);
             });
 
             base.OnModelCreating(modelBuilder);

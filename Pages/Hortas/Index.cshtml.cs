@@ -37,12 +37,20 @@ namespace HortalisCSharp.Pages.Hortas
 
             if (user.Papel == PapelUsuario.Administrador)
             {
-                Hortas = await _db.Hortas.Include(h => h.Usuario).OrderByDescending(h => h.CriadoEm).ToListAsync();
+                Hortas = await _db.Hortas
+                    .Include(h => h.Usuario)
+                    .Include(h => h.HortaProdutos)
+                        .ThenInclude(hp => hp.Produto)
+                    .OrderByDescending(h => h.CriadoEm)
+                    .ToListAsync();
             }
             else if (user.Papel == PapelUsuario.Gerente)
             {
-                Hortas = await _db.Hortas.Where(h => h.UsuarioId == user.Id)
+                Hortas = await _db.Hortas
+                    .Where(h => h.UsuarioId == user.Id)
                     .Include(h => h.Usuario)
+                    .Include(h => h.HortaProdutos)
+                        .ThenInclude(hp => hp.Produto)
                     .OrderByDescending(h => h.CriadoEm)
                     .ToListAsync();
             }

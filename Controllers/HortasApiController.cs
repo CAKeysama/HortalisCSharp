@@ -42,7 +42,14 @@ namespace HortalisCSharp.Controllers
         {
             var list = await _db.Hortas
                 .AsNoTracking()
-                .Select(h => new HortaMapDto(h.Id, h.Nome, h.Latitude, h.Longitude, h.Produtos))
+                .Select(h => new HortaMapDto(
+                    h.Id,
+                    h.Nome,
+                    h.Latitude,
+                    h.Longitude,
+                    // Corrigido: obtendo os nomes dos produtos relacionados à horta
+                    string.Join(", ", h.HortaProdutos.Select(hp => hp.Produto.Nome))
+                ))
                 .ToListAsync();
 
             return Ok(list);
@@ -54,6 +61,8 @@ namespace HortalisCSharp.Controllers
             var h = await _db.Hortas
                 .AsNoTracking()
                 .Include(x => x.Usuario)
+                .Include(x => x.HortaProdutos)
+                    .ThenInclude(hp => hp.Produto)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (h == null) return NotFound();
@@ -63,7 +72,8 @@ namespace HortalisCSharp.Controllers
                 h.Nome,
                 h.Latitude,
                 h.Longitude,
-                h.Produtos,
+                // Corrigido: obtendo os nomes dos produtos relacionados à horta
+                string.Join(", ", h.HortaProdutos.Select(hp => hp.Produto.Nome)),
                 h.Descricao,
                 h.Foto,
                 h.Telefone,

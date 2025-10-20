@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace HortalisCSharp.Models
@@ -18,10 +20,6 @@ namespace HortalisCSharp.Models
         [MaxLength(2000)]
         public string? Descricao { get; set; }
 
-        // Lista simples separada por vírgula (ex: "alface,tomate,couve")
-        [MaxLength(1000)]
-        public string? Produtos { get; set; }
-
         public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
 
         [MaxLength(500)]
@@ -33,5 +31,8 @@ namespace HortalisCSharp.Models
         // Dono/criador da horta
         public int? UsuarioId { get; set; }
         public Usuario? Usuario { get; set; }
+
+        // Navegação para produtos normalizados
+        public ICollection<HortaProduto> HortaProdutos { get; set; } = new List<HortaProduto>();
     }
 }
