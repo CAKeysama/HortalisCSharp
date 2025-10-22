@@ -16,6 +16,80 @@ document.addEventListener('DOMContentLoaded', () => {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // Navbar proximity: torna header + navbar translúcidos com blur quando o usuário se aproxima do mapa (apenas na página inicial)
+    (function() {
+        const path = window.location.pathname.toLowerCase();
+        const isHome = path === '/' || path === '/home' || path === '/home/index';
+        const headerEl = document.querySelector('header');
+        const navbar = document.querySelector('.navbar');
+        if (!headerEl || !navbar || !isHome) return;
+
+        // Injeta regras CSS necessárias (apenas uma vez)
+        if (!document.getElementById('near-map-navbar-styles')) {
+            const style = document.createElement('style');
+            style.id = 'near-map-navbar-styles';
+            style.textContent = `
+                /* fundo translúcido + blur para criar separação agradável sem competir com o mapa */
+                header.near-map,
+                header.near-map nav,
+                .navbar.near-map,
+                .navbar.near-map .container,
+                .navbar.near-map .container-fluid {
+                    background-color: rgba(206,224,216,0.85) !important; /* CEE0D8 + alpha */
+                    backdrop-filter: blur(6px) saturate(1.05);
+                    -webkit-backdrop-filter: blur(6px) saturate(1.05);
+                    transition: background-color .22s ease, backdrop-filter .22s ease;
+                    background-image: none !important;
+                }
+
+                /* forçar elementos internos a não sobrescreverem o fundo translúcido */
+                header.near-map *[class*="bg-"],
+                .navbar.near-map *[class*="bg-"] {
+                    background-color: transparent !important;
+                    background-image: none !important;
+                }
+
+                /* garantir contraste legível dos links/textos */
+                header.near-map .nav-link,
+                header.near-map .navbar-brand,
+                header.near-map .navbar-text,
+                .navbar.near-map .nav-link,
+                .navbar.near-map .navbar-brand {
+                    color: rgba(11,90,47,0.95) !important;
+                }
+
+                /* adaptar logo branca para o fundo claro/translúcido (inverte para visibilidade) */
+                header.near-map .navbar-brand img,
+                .navbar.near-map .navbar-brand img {
+                    filter: invert(1) !important; /* transforma logo branca para escuro: ajuste se precisar trocar a imagem */
+                }
+
+                /* pequenos ajustes visuais */
+                header.near-map { box-shadow: 0 1px 0 rgba(0,0,0,0.06) !important; border-bottom: 1px solid rgba(11,90,47,0.06) !important; }
+                header.near-map .navbar-toggler,
+                .navbar.near-map .navbar-toggler { border-color: rgba(11,90,47,0.12) !important; }
+                header.near-map .navbar-toggler-icon,
+                .navbar.near-map .navbar-toggler-icon { filter: none !important; }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Observa quando o mapa entra na região central da janela (rootMargin define "próximo")
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    headerEl.classList.add('near-map');
+                    navbar.classList.add('near-map');
+                } else {
+                    headerEl.classList.remove('near-map');
+                    navbar.classList.remove('near-map');
+                }
+            });
+        }, { root: null, threshold: 0, rootMargin: '-25% 0px -35% 0px' });
+
+        observer.observe(mapEl);
+    })();
+
     let userPos = null;
 
     // Tenta centralizar na localização do usuário
