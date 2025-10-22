@@ -1,4 +1,5 @@
 using HortalisCSharp.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
@@ -37,6 +38,7 @@ namespace HortalisCSharp.Controllers
             string? Dono
         );
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<HortaMapDto>>> Get()
         {
