@@ -16,16 +16,19 @@
                 <input asp-for="Input.Nome" class="form-control" />
                 <span asp-validation-for="Input.Nome" class="text-danger"></span>
             </div>
-            <div class="col-md-3">
-                <label asp-for="Input.Latitude" class="form-label"></label>
-                <input asp-for="Input.Latitude" class="form-control" />
-                <span asp-validation-for="Input.Latitude" class="text-danger"></span>
+
+            <!-- substituído: campos visíveis de Latitude/Longitude -> mapa interativo -->
+            <div class="col-12">
+                <label class="form-label">Localização</label>
+                <div id="map-horta" style="height:360px; border:1px solid #ddd; border-radius:6px;"></div>
+                <div class="form-text">Clique no mapa para posicionar o marcador. Você pode arrastar o marcador para ajustar.</div>
+                <input type="hidden" asp-for="Input.Latitude" />
+                <input type="hidden" asp-for="Input.Longitude" />
+                <span class="text-muted small">As coordenadas serão preenchidas automaticamente.</span>
+                <span asp-validation-for="Input.Latitude" class="text-danger d-block"></span>
+                <span asp-validation-for="Input.Longitude" class="text-danger d-block"></span>
             </div>
-            <div class="col-md-3">
-                <label asp-for="Input.Longitude" class="form-label"></label>
-                <input asp-for="Input.Longitude" class="form-control" />
-                <span asp-validation-for="Input.Longitude" class="text-danger"></span>
-            </div>
+
             <div class="col-12">
                 <label asp-for="Input.Descricao" class="form-label"></label>
                 <textarea asp-for="Input.Descricao" rows="4" class="form-control"></textarea>
@@ -67,6 +70,67 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        (function(){
+            // MAPA LEAFLET (mesma lógica do Create)
+            const latInput = document.getElementsByName('Input.Latitude')[0];
+            const lngInput = document.getElementsByName('Input.Longitude')[0];
+            const mapId = 'map-horta';
+            const defaultCenter = [-14.2350, -51.9253];
+            const defaultZoom = 4;
+
+            function toFloat(v){ return (v === undefined || v === null || v === '') ? NaN : parseFloat(v); }
+
+            const initialLat = toFloat(latInput?.value);
+            const initialLng = toFloat(lngInput?.value);
+
+            const map = L.map(mapId).setView((!isNaN(initialLat) && !isNaN(initialLng)) ? [initialLat, initialLng] : defaultCenter,
+                                             (!isNaN(initialLat) ? 13 : defaultZoom));
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            let marker = null;
+
+            // pega separador decimal usado no servidor (será ',' em pt-BR, '.' em en-US, etc.)
+            const decimalSeparator = '@System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator';
+
+            function formatNumberForServer(n){
+                // JS toFixed usa ponto; trocamos pelo separador do servidor se necessário
+                return n.toFixed(6).replace('.', decimalSeparator);
+            }
+
+            function setInputsFromLatLng(latlng){
+                if(!latInput || !lngInput) return;
+                latInput.value = formatNumberForServer(latlng.lat);
+                lngInput.value = formatNumberForServer(latlng.lng);
+            }
+
+            function addOrMoveMarker(latlng){
+                if(marker){
+                    marker.setLatLng(latlng);
+                } else {
+                    marker = L.marker(latlng, {draggable:true}).addTo(map);
+                    marker.on('dragend', function(){
+                        const p = marker.getLatLng();
+                        setInputsFromLatLng(p);
+                    });
+                }
+                setInputsFromLatLng(latlng);
+            }
+
+            if(!isNaN(initialLat) && !isNaN(initialLng)){
+                addOrMoveMarker(L.latLng(initialLat, initialLng));
+            }
+
+            map.on('click', function(e){
+                addOrMoveMarker(e.latlng);
+            });
+        })();
+    </script>
+
     <script>
         // Reutiliza o mesmo script do Create (mantendo escopo)
         (function(){
