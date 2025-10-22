@@ -4,6 +4,8 @@
 }
 
 <div class="container" style="max-width: 980px; margin-top: 90px;">
+    <form id="antiForgery">@Html.AntiForgeryToken()</form>
+
     <div class="text-center mb-4">
         <h2 class="mt-3 fw-bold">Relatórios</h2>
         <div class="text-muted">Visão geral do sistema</div>
@@ -148,7 +150,8 @@
                                         <div class="small text-muted">@h.UsuarioNome</div>
                                     </div>
                                     <div class="text-end">
-                                        <div class="small text-muted">@h.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy")
+                                        <div class="small text-muted">
+                                            @((h.UltimaAlteracao ?? h.CriadoEm).ToLocalTime().ToString("dd/MM/yyyy"))
                                         </div>
                                         <div class="badge bg-secondary mt-1">@h.ProdutoCount produtos</div>
                                     </div>
@@ -164,17 +167,129 @@
             </div>
         </div>
     </div>
+
+    <!-- Nova seção: Lista editável de usuários -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Usuários — editar papéis</span>
+                    <small class="text-muted">Alterações são aplicadas imediatamente</small>
+                </div>
+
+                <div class="list-group list-group-flush" id="usersList" style="max-height:420px; overflow:auto;">
+                    @if (Model.Usuarios?.Any() == true)
+                    {
+                        foreach (var u in Model.Usuarios)
+                        {
+                            <div class="list-group-item d-flex align-items-center justify-content-between user-row" data-user-id="@u.UsuarioId">
+                                <div class="me-3" style="min-width:260px;">
+                                    <div class="fw-semibold">@u.Nome</div>
+                                    <div class="small text-muted">@u.Email</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <select class="form-select form-select-sm user-role-select" style="width:240px;">
+                                        <option value="0" selected="@(u.Papel == 0 ? "selected" : null)">Padrão</option>
+                                        <option value="1" selected="@(u.Papel == 1 ? "selected" : null)">Gerente</option>
+                                        <option value="2" selected="@(u.Papel == 2 ? "selected" : null)">Administrador</option>
+                                    </select>
+                                    <div class="status-indicator" style="width:36px; text-align:center;"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="list-group-item text-muted">Nenhum usuário encontrado</div>
+                    }
+                </div>
+                <div class="card-footer bg-white border-0 small text-muted">
+                    Use esse painel para ajustar rapidamente os papéis dos usuários.
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     <script>
         (function () {
+            const tokenInput = document.querySelector('#antiForgery input[name="__RequestVerificationToken"]');
+            const token = tokenInput ? tokenInput.value : null;
+
+            function showStatus(el, type, msg) {
+                el.innerHTML = '';
+                if (type === 'loading') {
+                    el.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                } else if (type === 'ok') {
+                    el.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i>';
+                    setTimeout(() => el.innerHTML = '', 1500);
+                } else {
+                    el.innerHTML = '<i class="bi bi-x-circle-fill text-danger" title="' + (msg || '') + '"></i>';
+                    setTimeout(() => el.innerHTML = '', 2500);
+                }
+            }
+
+            document.querySelectorAll('.user-role-select').forEach(select => {
+                select.addEventListener('change', async function () {
+                    const row = this.closest('.user-row');
+                    if (!row) return;
+                    const userId = row.getAttribute('data-user-id');
+                    const papel = this.value;
+                    const statusEl = row.querySelector('.status-indicator');
+
+                    showStatus(statusEl, 'loading');
+
+                    try {
+                        const body = new URLSearchParams();
+                        body.append('id', userId);
+                        body.append('papel', papel);
+
+                        const res = await fetch('/Admin/AtualizarPapel', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                                'RequestVerificationToken': token
+                            },
+                            body: body.toString()
+                        });
+
+                        if (!res.ok) {
+                            const txt = await res.text().catch(() => res.statusText);
+                            showStatus(statusEl, 'error', txt);
+                            return;
+                        }
+
+                        showStatus(statusEl, 'ok');
+                    } catch (err) {
+                        showStatus(statusEl, 'error', err?.message || 'Erro');
+                    }
+                });
+            });
+        })();
+    </script>
+
+    <script>
+        (function () {
             const input = document.getElementById('prodSearch');
-            const list = Array.from(document.querySelectorAll('#prodList .prod-item'));
+            const listContainer = document.getElementById('prodList');
+            if (!input || !listContainer) return;
+
+            function normalize(s) {
+                // remove acentos e normaliza
+                return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+            }
+
+            function getItems() {
+                return Array.from(listContainer.querySelectorAll('.prod-item'));
+            }
+
             input.addEventListener('input', function () {
-                const q = this.value.trim().toLowerCase();
-                list.forEach(item => {
-                    const name = item.querySelector('.prod-name').textContent.toLowerCase();
+                const q = normalize(this.value);
+                const items = getItems();
+                items.forEach(item => {
+                    const nameEl = item.querySelector('.prod-name');
+                    const name = normalize(nameEl ? nameEl.textContent : '');
                     item.style.display = q === '' || name.includes(q) ? '' : 'none';
                 });
             });

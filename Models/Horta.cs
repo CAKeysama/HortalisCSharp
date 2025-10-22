@@ -34,5 +34,7 @@ namespace HortalisCSharp.Models
 
         // Navegação para produtos normalizados
         public ICollection<HortaProduto> HortaProdutos { get; set; } = new List<HortaProduto>();
+
+        public DateTime? UltimaAlteracao { get; set; }
     }
 }

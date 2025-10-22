@@ -99,6 +99,9 @@ namespace HortalisCSharp.Pages.Hortas
                 _db.HortaProdutos.Add(new HortaProduto { HortaId = h.Id, ProdutoId = produto.Id });
             }
 
+            // depois de aplicar alterações em 'h'
+            h.UltimaAlteracao = DateTime.UtcNow;
+
             await _db.SaveChangesAsync();
             return RedirectToPage("Index");
         }

@@ -3,6 +3,7 @@ using HortalisCSharp.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using HortalisCSharp.Models; // para PapelUsuario
 
 namespace HortalisCSharp.Controllers
 {
@@ -26,7 +27,7 @@ namespace HortalisCSharp.Controllers
             // Total de produtos distintos (somente tabela Produtos normalizada)
             var totalProdutos = await _db.Produtos.AsNoTracking().CountAsync();
 
-            // Top produtos (contagem por HortaProdutos) — pode retornar mais itens para permitir busca/rolagem
+            // Top produtos (contagem por HortaProdutos)
             var topProdutos = await _db.HortaProdutos
                 .AsNoTracking()
                 .Include(hp => hp.Produto)
@@ -34,7 +35,7 @@ namespace HortalisCSharp.Controllers
                 .GroupBy(hp => hp.Produto!.Nome)
                 .Select(g => new RelatoriosViewModel.ProductStat { Nome = g.Key!, Count = g.Count() })
                 .OrderByDescending(x => x.Count)
-                .Take(100) // aumentar limite para permitir melhor visualização; criar página dedicada se necessário
+                .Take(100)
                 .ToListAsync();
 
             // Top usuários por número de hortas
@@ -79,7 +80,8 @@ namespace HortalisCSharp.Controllers
                     h.Nome,
                     UsuarioId = h.UsuarioId,
                     UsuarioNome = h.Usuario != null ? h.Usuario.Nome : null,
-                    h.CriadoEm
+                    h.CriadoEm,
+                    h.UltimaAlteracao
                 })
                 .ToListAsync();
 
@@ -92,12 +94,26 @@ namespace HortalisCSharp.Controllers
                 {
                     Id = r.Id,
                     Nome = r.Nome,
-                    // define texto coerente para visualização:
                     UsuarioNome = r.UsuarioNome ?? (r.UsuarioId.HasValue ? "(Usuário excluído)" : "(Sem dono)"),
                     CriadoEm = r.CriadoEm,
+                    UltimaAlteracao = r.UltimaAlteracao,
                     ProdutoCount = produtoCount
                 });
             }
+
+            // NOVO: lista de usuários para edição rápida de papéis
+            var usuarios = await _db.Usuarios
+                .AsNoTracking()
+                .OrderBy(u => u.Nome)
+                .Select(u => new RelatoriosViewModel.UserItem
+                {
+                    UsuarioId = u.Id,
+                    Nome = u.Nome,
+                    Email = u.Email,
+                    Papel = (int)u.Papel
+                })
+                .Take(200) // limitar para não carregar tudo de uma vez
+                .ToListAsync();
 
             var vm = new RelatoriosViewModel
             {
@@ -108,11 +124,30 @@ namespace HortalisCSharp.Controllers
                 TopUsuarios = topUsuarios,
                 MediaProdutosPorHorta = Math.Round(mediaProdutosPorHorta, 2),
                 ProdutosSemHorta = produtosSemHorta,
-                HortasRecentes = hortaSummaries
+                HortasRecentes = hortaSummaries,
+                Usuarios = usuarios
             };
 
             ViewData["Title"] = "Relatórios";
             return View(vm);
+        }
+
+        // POST: /Admin/AtualizarPapel
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AtualizarPapel(int id, int papel)
+        {
+            if (!Enum.IsDefined(typeof(PapelUsuario), papel))
+                return BadRequest("Papel inválido.");
+
+            var usuario = await _db.Usuarios.FindAsync(id);
+            if (usuario == null)
+                return NotFound();
+
+            usuario.Papel = (PapelUsuario)papel;
+            await _db.SaveChangesAsync();
+
+            return Ok(new { id = usuario.Id, papel = (int)usuario.Papel });
         }
     }
 }

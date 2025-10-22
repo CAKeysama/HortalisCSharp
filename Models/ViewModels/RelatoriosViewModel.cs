@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace HortalisCSharp.Models.ViewModels
 {
     public class RelatoriosViewModel
@@ -14,6 +17,9 @@ namespace HortalisCSharp.Models.ViewModels
         public List<UserStat> TopUsuarios { get; set; } = new();
         public List<HortaSummary> HortasRecentes { get; set; } = new();
 
+        // Nova propriedade: lista editável de usuários
+        public List<UserItem> Usuarios { get; set; } = new();
+
         public class ProductStat
         {
             public string Nome { get; set; } = null!;
@@ -27,6 +33,15 @@ namespace HortalisCSharp.Models.ViewModels
             public int Count { get; set; }
         }
 
+        // Item para edição rápida de papel
+        public class UserItem
+        {
+            public int UsuarioId { get; set; }
+            public string Nome { get; set; } = null!;
+            public string Email { get; set; } = null!;
+            public int Papel { get; set; }
+        }
+
         public class HortaSummary
         {
             public int Id { get; set; }
@@ -34,6 +49,9 @@ namespace HortalisCSharp.Models.ViewModels
             public string? UsuarioNome { get; set; }
             public DateTime CriadoEm { get; set; }
             public int ProdutoCount { get; set; }
+
+            // Nova propriedade: data da última alteração (nullable se não existir)
+            public DateTime? UltimaAlteracao { get; set; }
         }
     }
 }

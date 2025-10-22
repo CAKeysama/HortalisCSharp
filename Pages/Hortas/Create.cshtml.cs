@@ -41,6 +41,7 @@ namespace HortalisCSharp.Pages.Hortas
             if (!ModelState.IsValid) return Page();
 
             Input.CriadoEm = DateTime.UtcNow;
+            Input.UltimaAlteracao = Input.CriadoEm;
             Input.UsuarioId = user.Id;
 
             _db.Hortas.Add(Input);
