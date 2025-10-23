@@ -57,6 +57,8 @@ namespace HortalisCSharp.Controllers
             return Ok(list);
         }
 
+        // Permite acesso anônimo aos detalhes de uma horta (para uso público no mapa)
+        [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<ActionResult<HortaDetailsDto>> GetById([Range(1, int.MaxValue)] int id)
         {

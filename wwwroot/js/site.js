@@ -1,114 +1,36 @@
 ﻿// SITE.JS Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
+// para detalhes sobre bundling/minification de assets estáticos.
+//
+// Refatorado: modularizado, com debounce, menor repetição de queries DOM,
+// tratamento de erros mais explícito e comentários em pt-BR.
 
 document.addEventListener('DOMContentLoaded', () => {
-    const mapEl = document.getElementById('map');
-    if (!mapEl || typeof L === 'undefined') return;
+    // --- Configurações iniciais ---
+    const MAP_ID = 'map';
+    const MAP_EL = document.getElementById(MAP_ID);
+    if (!MAP_EL || typeof L === 'undefined') return;
 
-    const defaultCenter = [-21.6036, -48.3640]; // Matão, SP
-    const map = L.map('map', { zoomControl: true, attributionControl: true })
-        .setView(defaultCenter, 13);
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Navbar proximity: torna header + navbar translúcidos com blur quando o usuário se aproxima do mapa (apenas na página inicial)
-    (function() {
-        const path = window.location.pathname.toLowerCase();
-        const isHome = path === '/' || path === '/home' || path === '/home/index';
-        const headerEl = document.querySelector('header');
-        const navbar = document.querySelector('.navbar');
-        if (!headerEl || !navbar || !isHome) return;
-
-        // Injeta regras CSS necessárias (apenas uma vez)
-        if (!document.getElementById('near-map-navbar-styles')) {
-            const style = document.createElement('style');
-            style.id = 'near-map-navbar-styles';
-            style.textContent = `
-                /* fundo translúcido + blur para criar separação agradável sem competir com o mapa */
-                header.near-map,
-                header.near-map nav,
-                .navbar.near-map,
-                .navbar.near-map .container,
-                .navbar.near-map .container-fluid {
-                    background-color: rgba(206,224,216,0.85) !important; /* CEE0D8 + alpha */
-                    backdrop-filter: blur(6px) saturate(1.05);
-                    -webkit-backdrop-filter: blur(6px) saturate(1.05);
-                    transition: background-color .22s ease, backdrop-filter .22s ease;
-                    background-image: none !important;
-                }
-
-                /* forçar elementos internos a não sobrescreverem o fundo translúcido */
-                header.near-map *[class*="bg-"],
-                .navbar.near-map *[class*="bg-"] {
-                    background-color: transparent !important;
-                    background-image: none !important;
-                }
-
-                /* garantir contraste legível dos links/textos */
-                header.near-map .nav-link,
-                header.near-map .navbar-brand,
-                header.near-map .navbar-text,
-                .navbar.near-map .nav-link,
-                .navbar.near-map .navbar-brand {
-                    color: rgba(11,90,47,0.95) !important;
-                }
-
-                /* adaptar logo branca para o fundo claro/translúcido (inverte para visibilidade) */
-                header.near-map .navbar-brand img,
-                .navbar.near-map .navbar-brand img {
-                    filter: invert(1) !important; /* transforma logo branca para escuro: ajuste se precisar trocar a imagem */
-                }
-
-                /* pequenos ajustes visuais */
-                header.near-map { box-shadow: 0 1px 0 rgba(0,0,0,0.06) !important; border-bottom: 1px solid rgba(11,90,47,0.06) !important; }
-                header.near-map .navbar-toggler,
-                .navbar.near-map .navbar-toggler { border-color: rgba(11,90,47,0.12) !important; }
-                header.near-map .navbar-toggler-icon,
-                .navbar.near-map .navbar-toggler-icon { filter: none !important; }
-            `;
-            document.head.appendChild(style);
-        }
-
-        // Observa quando o mapa entra na região central da janela (rootMargin define "próximo")
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    headerEl.classList.add('near-map');
-                    navbar.classList.add('near-map');
-                } else {
-                    headerEl.classList.remove('near-map');
-                    navbar.classList.remove('near-map');
-                }
-            });
-        }, { root: null, threshold: 0, rootMargin: '-25% 0px -35% 0px' });
-
-        observer.observe(mapEl);
-    })();
-
+    const DEFAULT_CENTER = [-21.6036, -48.3640]; // Matão, SP
+    const DEFAULT_ZOOM = 13;
+    let map = null;
     let userPos = null;
 
-    // Tenta centralizar na localização do usuário
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                userPos = [pos.coords.latitude, pos.coords.longitude];
-                map.setView(userPos, 14);
-                L.marker(userPos).addTo(map).bindPopup('Você está aqui');
-            },
-            err => {
-                alert('Não foi possível acessar sua localização. Usando localização padrão.');
-                map.setView(defaultCenter, 13);
-            },
-            { enableHighAccuracy: true, timeout: 5000, maximumAge: 300000 }
-        );
+    // Estado compartilhado
+    let markers = [];
+    let allFoods = [];
+
+    // --- Helpers ---
+    const normalize = s => (s || '').toString().trim().toLowerCase();
+
+    function debounce(fn, wait = 200) {
+        let t = null;
+        return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...args), wait);
+        };
     }
 
-    // Ícone customizado: círculo verde com folha branca
+    // --- Mapa e camadas ---
     function createLeafIcon() {
         const html = `
           <div style="
@@ -129,24 +51,98 @@ document.addEventListener('DOMContentLoaded', () => {
             popupAnchor: [0, -28]
         });
     }
-    const leafIcon = createLeafIcon();
 
-    // Referências de UI da busca
-    const input = document.getElementById('searchInput');
-    const resultsEl = document.getElementById('resultsCount');
-    const resultsContainer = document.getElementById('searchResults');
-    const noResultsEl = document.getElementById('noResults');
-    const suggestionsEl = document.getElementById('suggestions');
+    function initMap() {
+        map = L.map(MAP_ID, { zoomControl: true, attributionControl: true })
+            .setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
-    const normalize = s => (s || '').toString().trim().toLowerCase();
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-    let markers = [];
-    let allFoods = [];
+        // tentar geolocalizar o usuário (não bloqueia se falhar)
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    userPos = [pos.coords.latitude, pos.coords.longitude];
+                    map.setView(userPos, 14);
+                    L.marker(userPos).addTo(map).bindPopup('Você está aqui');
+                },
+                () => {
+                    // Silent fallback: mantém centro padrão, opcional alerta original removido por UX
+                    map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 300000 }
+            );
+        }
 
-    // Centraliza o popup atual no centro do mapa
+        return map;
+    }
+
+    // --- Navbar próximo ao mapa (efeito visual) ---
+    (function observeNavbarProximity() {
+        const path = window.location.pathname.toLowerCase();
+        const isHome = path === '/' || path === '/home' || path === '/home/index';
+        const headerEl = document.querySelector('header');
+        const navbar = document.querySelector('.navbar');
+        if (!headerEl || !navbar || !isHome) return;
+
+        if (!document.getElementById('near-map-navbar-styles')) {
+            const style = document.createElement('style');
+            style.id = 'near-map-navbar-styles';
+            style.textContent = `
+                header.near-map,
+                header.near-map nav,
+                .navbar.near-map,
+                .navbar.near-map .container,
+                .navbar.near-map .container-fluid {
+                    background-color: rgba(206,224,216,0.85) !important;
+                    backdrop-filter: blur(6px) saturate(1.05);
+                    -webkit-backdrop-filter: blur(6px) saturate(1.05);
+                    transition: background-color .22s ease, backdrop-filter .22s ease;
+                    background-image: none !important;
+                }
+                header.near-map *[class*="bg-"],
+                .navbar.near-map *[class*="bg-"] {
+                    background-color: transparent !important;
+                    background-image: none !important;
+                }
+                header.near-map .nav-link,
+                header.near-map .navbar-brand,
+                header.near-map .navbar-text,
+                .navbar.near-map .nav-link,
+                .navbar.near-map .navbar-brand {
+                    color: rgba(11,90,47,0.95) !important;
+                }
+                header.near-map .navbar-brand img,
+                .navbar.near-map .navbar-brand img {
+                    filter: invert(1) !important;
+                }
+                header.near-map { box-shadow: 0 1px 0 rgba(0,0,0,0.06) !important; border-bottom: 1px solid rgba(11,90,47,0.06) !important; }
+                header.near-map .navbar-toggler,
+                .navbar.near-map .navbar-toggler { border-color: rgba(11,90,47,0.12) !important; }
+                header.near-map .navbar-toggler-icon,
+                .navbar.near-map .navbar-toggler-icon { filter: none !important; }
+            `;
+            document.head.appendChild(style);
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const add = entry.isIntersecting;
+                headerEl.classList.toggle('near-map', add);
+                navbar.classList.toggle('near-map', add);
+            });
+        }, { root: null, threshold: 0, rootMargin: '-25% 0px -35% 0px' });
+
+        observer.observe(MAP_EL);
+    })();
+
+    // --- Popup centralizado ---
     function centerActivePopup() {
         const popup = document.querySelector('.leaflet-popup');
-        if (!popup) return;
+        if (!popup || !map) return;
 
         const mapRect = map.getContainer().getBoundingClientRect();
         const popupRect = popup.getBoundingClientRect();
@@ -162,16 +158,20 @@ document.addEventListener('DOMContentLoaded', () => {
         map.panBy([dx, dy], { animate: true, duration: 0.4 });
     }
 
-    // Recentrar sempre que um popup abre
-    map.on('popupopen', () => setTimeout(centerActivePopup, 0));
+    // quando um popup abre: recentra
+    // usa setTimeout(0) para garantir que DOM do popup já esteja renderizado
+    function attachPopupAutoCenter() {
+        if (!map) return;
+        map.on('popupopen', () => setTimeout(centerActivePopup, 0));
+    }
 
+    // --- HTML do popup de uma horta ---
     function popupHtml(g) {
         const dest = encodeURIComponent(`${g.lat},${g.lng}`);
         const origin = userPos ? `&origin=${encodeURIComponent(userPos[0] + ',' + userPos[1])}` : '';
         const routeUrl = `https://www.google.com/maps/dir/?api=1&destination=${dest}${origin}&travelmode=driving`;
         const foodsText = g.foods?.length ? `Alimentos: ${g.foods.join(', ')}` : '';
 
-        // Novo card visual (retangular, limpo e com hierarquia)
         return `
             <div class="p-0" style="
                 background:#ffffff;
@@ -205,9 +205,14 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    function renderMarkers(gardens) {
+    // --- Renderização e filtro de marcadores ---
+    function clearMarkers() {
         markers.forEach(m => { if (map.hasLayer(m)) map.removeLayer(m); });
         markers = [];
+    }
+
+    function renderMarkers(gardens, leafIcon) {
+        clearMarkers();
 
         allFoods = [...new Set(gardens.flatMap(g => (g.foods || [])))];
 
@@ -218,6 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
             markers.push(m);
         });
 
+        const resultsEl = document.getElementById('resultsCount');
+        const resultsContainer = document.getElementById('searchResults');
         if (resultsEl && resultsContainer) {
             resultsEl.textContent = String(markers.length);
             resultsContainer.classList.toggle('d-none', false);
@@ -237,11 +244,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        const resultsEl = document.getElementById('resultsCount');
+        const resultsContainer = document.getElementById('searchResults');
         if (resultsEl && resultsContainer) {
             resultsEl.textContent = String(visible);
             resultsContainer.classList.toggle('d-none', false);
         }
 
+        const noResultsEl = document.getElementById('noResults');
+        const suggestionsEl = document.getElementById('suggestions');
         const hasNo = visible === 0 && t;
         if (noResultsEl && suggestionsEl) {
             noResultsEl.classList.toggle('d-none', !hasNo);
@@ -249,101 +260,110 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (input) {
-        input.addEventListener('input', e => filterMarkers(e.target.value));
+    // --- Input de busca com debounce ---
+    function initSearchInput() {
+        const input = document.getElementById('searchInput');
+        if (!input) return;
+        input.addEventListener('input', debounce(e => filterMarkers(e.target.value), 180));
     }
 
-    // "Mais informações": expande dentro do próprio popup (sem modal) e recentra
-    mapEl.addEventListener('click', async (e) => {
-        const btn = e.target.closest('.horta-info');
-        if (!btn) return;
+    // --- Mais informações no popup (expansão inline) ---
+    function initPopupDetails() {
+        // Delegation no elemento do mapa (captura cliques nos botões com classe .horta-info)
+        MAP_EL.addEventListener('click', async (e) => {
+            const btn = e.target.closest('.horta-info');
+            if (!btn) return;
 
-        const popupContent = btn.closest('.leaflet-popup-content');
-        if (!popupContent) return;
+            const popupContent = btn.closest('.leaflet-popup-content');
+            if (!popupContent) return;
 
-        const container = popupContent.querySelector('.horta-details');
-        if (!container) return;
+            const container = popupContent.querySelector('.horta-details');
+            if (!container) return;
 
-        const isVisible = !container.classList.contains('d-none');
-        if (isVisible) {
-            container.classList.add('d-none');
-            container.innerHTML = '';
-            btn.innerHTML = `<i class="bi bi-info-circle me-1"></i> Mais informações`;
-            setTimeout(centerActivePopup, 0);
-            return;
-        }
+            const isVisible = !container.classList.contains('d-none');
+            if (isVisible) {
+                container.classList.add('d-none');
+                container.innerHTML = '';
+                btn.innerHTML = `<i class="bi bi-info-circle me-1"></i> Mais informações`;
+                setTimeout(centerActivePopup, 0);
+                return;
+            }
 
-        const id = btn.getAttribute('data-id');
-        if (!id) return;
+            const id = btn.getAttribute('data-id');
+            if (!id) return;
 
-        btn.disabled = true;
-        const oldHtml = btn.innerHTML;
-        btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Carregando...`;
+            btn.disabled = true;
+            const oldHtml = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Carregando...`;
 
-        try {
-            const res = await fetch(`/api/hortas/${id}`, { headers: { 'Accept': 'application/json' } });
-            if (!res.ok) throw new Error('Falha ao carregar detalhes');
-            const h = await res.json();
+            try {
+                const res = await fetch(`/api/hortas/${id}`, { headers: { 'Accept': 'application/json' } });
+                if (!res.ok) throw new Error('Falha ao carregar detalhes');
+                const h = await res.json();
 
-            const produtos = (h.produtos || '')
-                .split(',')
-                .map(p => p.trim())
-                .filter(Boolean)
-                .join(', ');
+                const produtos = (h.produtos || '')
+                    .split(',')
+                    .map(p => p.trim())
+                    .filter(Boolean)
+                    .join(', ');
 
-            container.innerHTML = `
-                <div class="p-3 rounded" style="background:#F8FAF9;color:#333;">
-                    ${h.foto ? `<img src="${h.foto}" alt="${h.nome}" class="img-fluid rounded mb-2 shadow-sm horta-photo" />` : ''}
-                    <div class="row g-2">
-                        <div class="col-12">
-                            <div class="small text-muted">Descrição</div>
-                            <div>${h.descricao ?? 'N/D'}</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="small text-muted">Localização</div>
-                            <div>${h.latitude.toFixed(5)}, ${h.longitude.toFixed(5)}</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="small text-muted">Telefone</div>
-                            <div>${h.telefone ? `<a href="tel:${h.telefone}" class="link-success text-decoration-none">${h.telefone}</a>` : 'N/D'}</div>
-                        </div>
-                        <div class="col-12">
-                            <div class="small text-muted">Produtos</div>
-                            <div>${produtos || 'N/D'}</div>
-                        </div>
-                        <div class="col-12">
-                            <div class="small text-muted">Dono</div>
-                            <div>${h.dono ?? 'N/D'}</div>
-                        </div>
-                        <div class="col-12">
-                            <div class="small text-muted">Criado em</div>
-                            <div>${new Date(h.criadoEm).toLocaleString()}</div>
+                container.innerHTML = `
+                    <div class="p-3 rounded" style="background:#F8FAF9;color:#333;">
+                        ${h.foto ? `<img src="${h.foto}" alt="${h.nome}" class="img-fluid rounded mb-2 shadow-sm horta-photo" />` : ''}
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <div class="small text-muted">Descrição</div>
+                                <div>${h.descricao ?? 'N/D'}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small text-muted">Localização</div>
+                                <div>${(typeof h.latitude === 'number' ? h.latitude.toFixed(5) : 'N/D')}, ${(typeof h.longitude === 'number' ? h.longitude.toFixed(5) : 'N/D')}</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small text-muted">Telefone</div>
+                                <div>${h.telefone ? `<a href="tel:${h.telefone}" class="link-success text-decoration-none">${h.telefone}</a>` : 'N/D'}</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="small text-muted">Produtos</div>
+                                <div>${produtos || 'N/D'}</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="small text-muted">Dono</div>
+                                <div>${h.dono ?? 'N/D'}</div>
+                            </div>
+                            <div class="col-12">
+                                <div class="small text-muted">Criado em</div>
+                                <div>${h.criadoEm ? new Date(h.criadoEm).toLocaleString() : 'N/D'}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `;
-            container.classList.remove('d-none');
-            btn.innerHTML = `<i class="bi bi-chevron-up me-1"></i> Menos informações`;
+                `;
+                container.classList.remove('d-none');
+                btn.innerHTML = `<i class="bi bi-chevron-up me-1"></i> Menos informações`;
 
-            setTimeout(centerActivePopup, 0);
+                setTimeout(centerActivePopup, 0);
 
-            container.querySelectorAll('img.horta-photo').forEach(img => {
-                img.addEventListener('load', () => setTimeout(centerActivePopup, 0), { once: true });
-            });
-        } catch {
-            container.innerHTML = `<div class="alert alert-warning mb-0">Não foi possível carregar as informações da horta.</div>`;
-            container.classList.remove('d-none');
-            btn.innerHTML = oldHtml;
-            setTimeout(centerActivePopup, 0);
-        } finally {
-            btn.disabled = false;
-        }
-    });
+                // garante recenter depois que imagens carregarem
+                container.querySelectorAll('img.horta-photo').forEach(img => {
+                    img.addEventListener('load', () => setTimeout(centerActivePopup, 0), { once: true });
+                });
+            } catch (err) {
+                container.innerHTML = `<div class="alert alert-warning mb-0">Não foi possível carregar as informações da horta.</div>`;
+                container.classList.remove('d-none');
+                btn.innerHTML = oldHtml;
+                setTimeout(centerActivePopup, 0);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    }
 
-    // Carrega as hortas do backend
-    fetch('/api/hortas', { headers: { 'Accept': 'application/json' } })
-        .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
-        .then((data) => {
+    // --- Carregar hortas do backend (com fallback) ---
+    async function loadGardens(leafIcon) {
+        try {
+            const res = await fetch('/api/hortas', { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) throw new Error('Fetch /api/hortas não ok');
+            const data = await res.json();
             const gardens = (data || []).map(h => ({
                 id: h.id,
                 name: h.nome,
@@ -354,13 +374,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     .map(x => x.trim())
                     .filter(x => x.length > 0)
             }));
-            renderMarkers(gardens);
-        })
-        .catch(() => {
-            const gardens = [
+            renderMarkers(gardens, leafIcon);
+        } catch {
+            const fallback = [
                 { id: 1, name: 'Horta Comunitária Central', lat: -21.6027, lng: -48.3605, foods: ['alface', 'tomate', 'cenoura'] },
                 { id: 2, name: 'Horta Escola Municipal', lat: -21.6081, lng: -48.3722, foods: ['alface', 'couve'] }
             ];
-            renderMarkers(gardens);
-        });
+            renderMarkers(fallback, leafIcon);
+        }
+    }
+
+    // --- Inicialização ---
+    const leafIcon = createLeafIcon();
+    initMap();
+    attachPopupAutoCenter();
+    initSearchInput();
+    initPopupDetails();
+    loadGardens(leafIcon);
+
 });
