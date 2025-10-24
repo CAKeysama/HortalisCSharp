@@ -68,7 +68,7 @@ namespace HortalisCSharp.Controllers
             // Produtos sem horta (produtos cadastrados sem associações)
             var produtosSemHorta = await _db.Produtos.AsNoTracking().Where(p => !p.HortaProdutos.Any()).CountAsync();
 
-            // Últimas 5 hortas com contagem de produtos (baseada em HortaProdutos)
+            // últimas 5 hortas com contagem de produtos (baseada em HortaProdutos)
             var recentes = await _db.Hortas
                 .AsNoTracking()
                 .Include(h => h.Usuario)
@@ -115,6 +115,33 @@ namespace HortalisCSharp.Controllers
                 .Take(200) // limitar para não carregar tudo de uma vez
                 .ToListAsync();
 
+            // NOVO: agregação de indicações por área (centroide + contagem)
+            var indicacoesRaw = await _db.Indicacoes
+                .AsNoTracking()
+                .Where(i => !string.IsNullOrWhiteSpace(i.AreaNome))
+                .ToListAsync();
+
+            var indicacoesGrouped = indicacoesRaw
+                .GroupBy(i => (i.AreaNome ?? "").Trim().ToLower())
+                .Select(g =>
+                {
+                    var displayName = g.Select(x => x.AreaNome).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x)) ?? g.Key;
+                    var coords = g.Where(x => x.Latitude.HasValue && x.Longitude.HasValue).ToList();
+                    double? avgLat = coords.Any() ? coords.Average(x => x.Latitude!.Value) : null;
+                    double? avgLng = coords.Any() ? coords.Average(x => x.Longitude!.Value) : null;
+
+                    return new RelatoriosViewModel.IndicacaoArea
+                    {
+                        AreaNome = displayName!,
+                        Latitude = avgLat,    // pode ser null
+                        Longitude = avgLng,   // pode ser null
+                        Count = g.Count()
+                    };
+                })
+                .OrderByDescending(x => x.Count)
+                .Take(200)
+                .ToList();
+
             var vm = new RelatoriosViewModel
             {
                 TotalHortas = totalHortas,
@@ -125,7 +152,8 @@ namespace HortalisCSharp.Controllers
                 MediaProdutosPorHorta = Math.Round(mediaProdutosPorHorta, 2),
                 ProdutosSemHorta = produtosSemHorta,
                 HortasRecentes = hortaSummaries,
-                Usuarios = usuarios
+                Usuarios = usuarios,
+                IndicacoesPorArea = indicacoesGrouped
             };
 
             ViewData["Title"] = "Relatórios";

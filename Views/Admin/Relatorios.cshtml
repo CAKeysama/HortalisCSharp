@@ -168,6 +168,52 @@
         </div>
     </div>
 
+    <!-- Seção: Indicações de novas hortas por área (mapa com círculos) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Indicações: onde as pessoas querem novas hortas</span>
+                    <small class="text-muted">Círculos maiores = maior demanda</small>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-8">
+                            <div id="indicacoesMap" class="rounded shadow" style="height:420px;"></div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="mb-2">
+                                <strong>Áreas com mais indicações</strong>
+                            </div>
+                            <div class="list-group" id="areasList" style="max-height:380px; overflow:auto;">
+                                @if (Model.IndicacoesPorArea?.Any() == true)
+                                {
+                                    foreach (var a in Model.IndicacoesPorArea)
+                                    {
+                                        <button type="button" class="list-group-item list-group-item-action area-item" data-lat="@(a.Latitude != null ? a.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")" data-lng="@(a.Longitude != null ? a.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "")" data-count="@a.Count">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="me-2 text-truncate" style="max-width:160px;">@a.AreaNome</div>
+                                                <span class="badge bg-success">@a.Count</span>
+                                            </div>
+                                        </button>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="list-group-item text-muted">Nenhuma indicação registrada</div>
+                                }
+                            </div>
+                            <div class="small text-muted mt-3">Clique em uma área para centralizar o mapa.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 small text-muted">
+                    As áreas são agrupadas por proximidade; círculos representam demanda relativa.
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Nova seção: Lista editável de usuários -->
     <div class="row mt-4">
         <div class="col-12">
@@ -291,6 +337,72 @@
                     const nameEl = item.querySelector('.prod-name');
                     const name = normalize(nameEl ? nameEl.textContent : '');
                     item.style.display = q === '' || name.includes(q) ? '' : 'none';
+                });
+            });
+        })();
+    </script>
+
+    <script>
+        (function () {
+            // Dados do servidor (Razor -> JS)
+            const indicacoes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.IndicacoesPorArea ?? new(), new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+
+            // Inicia mapa apenas se Leaflet estiver disponível
+            if (typeof L === 'undefined') return;
+
+            const mapEl = document.getElementById('indicacoesMap');
+            if (!mapEl) return;
+
+            const points = indicacoes.filter(p => p.latitude !== null && p.longitude !== null);
+
+            const defaultCenter = [-21.6005831, -48.3630907];
+            let center = defaultCenter;
+            if (points && points.length > 0) {
+                const avgLat = points.reduce((s, p) => s + p.latitude, 0) / points.length;
+                const avgLng = points.reduce((s, p) => s + p.longitude, 0) / points.length;
+                center = [avgLat, avgLng];
+            }
+
+            const map = L.map('indicacoesMap').setView(center, points && points.length > 0 ? 12 : 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+
+            const circles = [];
+
+            if (points && points.length > 0) {
+                points.forEach(p => {
+                    const radius = Math.max(80, p.count * 80);
+                    const circle = L.circle([p.latitude, p.longitude], {
+                        color: '#007C46',
+                        weight: 2,
+                        fillColor: '#007C46',
+                        fillOpacity: 0.18,
+                        radius: radius
+                    }).addTo(map);
+                    circle.bindTooltip(`${p.areaNome} — ${p.count} indicação${p.count !== 1 ? 'ões' : ''}`, { direction: 'auto' });
+                    circle.bindPopup(`<strong>${p.areaNome}</strong><br/>${p.count} indicação${p.count !== 1 ? 'ões' : ''}`);
+                    circles.push({ meta: p, layer: circle });
+                });
+            } else {
+                L.marker(center).addTo(map).bindPopup('Nenhuma indicação com coordenadas registradas').openPopup();
+            }
+
+            // Lista lateral interativa: centraliza ao clicar
+            document.querySelectorAll('.area-item').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const lat = parseFloat(this.getAttribute('data-lat'));
+                    const lng = parseFloat(this.getAttribute('data-lng'));
+                    const count = parseInt(this.getAttribute('data-count') || '1', 10);
+                    if (isFinite(lat) && isFinite(lng)) {
+                        const zoom = Math.min(16, 10 + Math.round(Math.log(Math.max(1, count)) * 2));
+                        map.setView([lat, lng], zoom, { animate: true });
+                        // opcional: abrir popup do círculo correspondente
+                        // usa tolerância maior para evitar problemas de arredondamento
+                        const found = circles.find(c => Math.abs(c.meta.latitude - lat) < 0.0005 && Math.abs(c.meta.longitude - lng) < 0.0005);
+                        if (found) found.layer.openPopup();
+                    }
                 });
             });
         })();

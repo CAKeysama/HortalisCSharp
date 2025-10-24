@@ -20,6 +20,9 @@ namespace HortalisCSharp.Models.ViewModels
         // Nova propriedade: lista editável de usuários
         public List<UserItem> Usuarios { get; set; } = new();
 
+        // Nova propriedade: indicações agregadas por área (usada em Relatórios)
+        public List<IndicacaoArea> IndicacoesPorArea { get; set; } = new();
+
         public class ProductStat
         {
             public string Nome { get; set; } = null!;
@@ -52,6 +55,15 @@ namespace HortalisCSharp.Models.ViewModels
 
             // Nova propriedade: data da última alteração (nullable se não existir)
             public DateTime? UltimaAlteracao { get; set; }
+        }
+
+        // Representa uma área com quantidade de indicações e coordenadas (para mapa)
+        public class IndicacaoArea
+        {
+            public string AreaNome { get; set; } = null!;
+            public double? Latitude { get; set; }   // agora nullable
+            public double? Longitude { get; set; }  // agora nullable
+            public int Count { get; set; }
         }
     }
 }

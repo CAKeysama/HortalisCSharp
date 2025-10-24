@@ -13,6 +13,9 @@ namespace HortalisCSharp.Data
         public DbSet<Produto> Produtos => Set<Produto>();
         public DbSet<HortaProduto> HortaProdutos => Set<HortaProduto>();
 
+        // Novo DbSet para indicações
+        public DbSet<Indicacao> Indicacoes => Set<Indicacao>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Usuario>()
@@ -54,6 +57,14 @@ namespace HortalisCSharp.Data
                   .WithMany(p => p.HortaProdutos)
                   .HasForeignKey(x => x.ProdutoId)
                   .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Configuração simples para Indicacao
+            modelBuilder.Entity<Indicacao>(i =>
+            {
+                i.Property(x => x.AreaNome).HasMaxLength(120);
+                i.HasIndex(x => x.AreaNome);
+                i.HasIndex(x => new { x.Latitude, x.Longitude });
             });
 
             base.OnModelCreating(modelBuilder);

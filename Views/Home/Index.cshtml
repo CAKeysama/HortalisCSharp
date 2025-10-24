@@ -96,56 +96,49 @@
         <div class="text-center mb-5">
             <h2 class="fw-bold mb-3" style="color:#333;">Conhece uma Horta?</h2>
             <p class="lead" style="color:#333;">
-                Ajude-nos a expandir nossa rede de hortas urbanas! Se você conhece uma horta que ainda não está em nosso mapa, compartilhe conosco os detalhes abaixo.
+                Indique rapidamente a localização. Para evitar variações no nome da área, a zona será gerada internamente com base na posição.
             </p>
         </div>
 
         <div class="row justify-content-center">
-            <div class="col-lg-8">
-                    <form class="p-5 rounded shadow" style="background: #D3E3DC;">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label for="nome" class="form-label fw-semibold" style="color:#333;">Seu Nome</label>
-                                <input type="text" class="form-control border-none" id="nome" placeholder="Digite seu nome" required>
+            <div class="col-lg-6">
+                <!-- Formulário enxuto: apenas Nome, E-mail e localização -->
+                <form id="indicarForm" method="post" action="/Home/EnviarIndicacao" class="p-4 rounded shadow" style="background: #D3E3DC;">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label for="nome" class="form-label fw-semibold" style="color:#333;">Seu Nome (opcional)</label>
+                        <input type="text" class="form-control" id="nome" name="Nome" placeholder="Digite seu nome">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-semibold" style="color:#333;">Seu E-mail (opcional)</label>
+                        <input type="email" class="form-control" id="email" name="Email" placeholder="Digite seu email">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" style="color:#333;">Localização (latitude / longitude)</label>
+                        <div class="d-flex gap-2">
+                            <input type="text" readonly class="form-control" id="latitude" name="Latitude" placeholder="Latitude" />
+                            <input type="text" readonly class="form-control" id="longitude" name="Longitude" placeholder="Longitude" />
                         </div>
-                        <div class="col-md-6">
-                            <label for="tipoHorta" class="form-label fw-semibold" style="color:#333;">Tipo de Horta</label>
-                                <input type="text" class="form-control border-none" id="tipoHorta" placeholder="Ex: Comunitária, Escolar" required>
+                        <div class="form-text">Clique no mapa abaixo para definir a localização ou use "Usar minha localização".</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold" style="color:#333;">Definir localização no mapa</label>
+                        <div id="indicarMap" class="rounded shadow-sm" style="height:220px;"></div>
+                        <div class="mt-2 d-flex gap-2">
+                            <button type="button" id="useLocationBtn" class="btn btn-sm btn-outline-success">Usar minha localização</button>
+                            <button type="button" id="clearLocationBtn" class="btn btn-sm btn-outline-secondary">Limpar localização</button>
+                            <small class="text-muted align-self-center">Clique no mapa para posicionar o marcador.</small>
                         </div>
                     </div>
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-6">
-                            <label for="email" class="form-label fw-semibold" style="color:#333;">Seu E-mail</label>
-                                <input type="email" class="form-control border-none" id="email" placeholder="Digite seu email" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="alimentosCultivados" class="form-label fw-semibold" style="color:#333;">Principais Alimentos Cultivados</label>
-                                <input type="text" class="form-control border-none" id="alimentosCultivados" placeholder="Ex: Alface, Tomate" required>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-6">
-                            <label for="nomeHorta" class="form-label fw-semibold" style="color:#333;">Nome da Horta</label>
-                                <input type="text" class="form-control border-none" id="nomeHorta" placeholder="Nome da horta" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="localizacao" class="form-label fw-semibold" style="color:#333;">Endereço da Horta</label>
-                            <input type="text" class="form-control border-none" id="localizacao" placeholder="Endereço aproximado" required>
-                        </div>
-                    </div>
-                    <div class="row g-3 mt-2">
-                        <div class="col-md-12">
-                            <label for="descricao" class="form-label fw-semibold" style="color:#333;">Descrição da Horta</label>
-                                <textarea class="form-control border-none" id="descricao" rows="4" placeholder="Alguma informação adicional sobre a horta"></textarea>
-                        </div>
-                    </div>
-                    <div class="text-center mt-4">
-                        <button type="submit" class="btn btn-lg px-5" style="background-color:#007C46; border-color:#007C46; color:#F1F1F1; box-shadow: 0 2px 8px rgba(0,124,70,0.15); transition: background 0.2s;">
+
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-lg px-5" style="background-color:#007C46; border-color:#007C46; color:#F1F1F1;">
                             Enviar indicação
                         </button>
-                    </div>
-                    <div class="text-center mt-3" style="color:#333; font-size: 0.9rem;">
-                        Sua contribuição é fundamental para expandir nossa rede de hortas urbanas e promover uma alimentação mais sustentável.
                     </div>
                 </form>
             </div>
@@ -272,3 +265,86 @@
     </section>
 
 </main>
+
+@section Scripts {
+    <script>
+        (function () {
+            // Inicializa mapa pequeno de indicação
+            if (typeof L === 'undefined') return;
+            const mapEl = document.getElementById('indicarMap');
+            if (!mapEl) return;
+
+            const defaultCenter = [-21.6005831, -48.3630907]; // centro aproximado (Brasil)
+            const map = L.map('indicarMap', { attributionControl: false }).setView(defaultCenter, 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19
+            }).addTo(map);
+
+            let marker = null;
+            const latInput = document.getElementById('latitude');
+            const lngInput = document.getElementById('longitude');
+
+            function setMarker(lat, lng) {
+                if (!isFinite(lat) || !isFinite(lng)) return;
+                if (marker) {
+                    marker.setLatLng([lat, lng]);
+                } else {
+                    marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                    marker.on('dragend', function (e) {
+                        const pos = e.target.getLatLng();
+                        latInput.value = pos.lat.toFixed(6).replace(',', '.');
+                        lngInput.value = pos.lng.toFixed(6).replace(',', '.');
+                    });
+                }
+                latInput.value = lat.toFixed(6).replace(',', '.');
+                lngInput.value = lng.toFixed(6).replace(',', '.');
+            }
+
+            map.on('click', function (e) {
+                setMarker(e.latlng.lat, e.latlng.lng);
+            });
+
+            document.getElementById('useLocationBtn').addEventListener('click', function () {
+                if (!navigator.geolocation) {
+                    alert('Geolocalização não suportada pelo seu navegador.');
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(function (pos) {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    setMarker(lat, lng);
+                    map.setView([lat, lng], 15);
+                }, function () {
+                    alert('Não foi possível obter sua localização.');
+                }, { enableHighAccuracy: true, timeout: 10000 });
+            });
+
+            document.getElementById('clearLocationBtn').addEventListener('click', function () {
+                if (marker) {
+                    map.removeLayer(marker);
+                    marker = null;
+                }
+                latInput.value = '';
+                lngInput.value = '';
+            });
+
+            // Validação mínima antes do envio: exige Lat/Lng
+            document.getElementById('indicarForm').addEventListener('submit', function (e) {
+                let lat = document.getElementById('latitude').value.trim();
+                let lng = document.getElementById('longitude').value.trim();
+
+                // Normaliza vírgula para ponto
+                lat = lat.replace(',', '.');
+                lng = lng.replace(',', '.');
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lng;
+
+                if (!lat || !lng || !isFinite(parseFloat(lat)) || !isFinite(parseFloat(lng))) {
+                    e.preventDefault();
+                    alert('Por favor defina a localização clicando no mapa ou usando "Usar minha localização".');
+                    return false;
+                }
+            });
+        })();
+    </script>
+}
