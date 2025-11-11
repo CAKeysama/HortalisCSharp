@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HortalisCSharp.Models; // para PapelUsuario
+using System.Globalization;
+using System.Text;
 
 namespace HortalisCSharp.Controllers
 {
@@ -68,7 +70,7 @@ namespace HortalisCSharp.Controllers
             // Produtos sem horta (produtos cadastrados sem associações)
             var produtosSemHorta = await _db.Produtos.AsNoTracking().Where(p => !p.HortaProdutos.Any()).CountAsync();
 
-            // últimas 5 hortas com contagem de produtos (baseada em HortaProdutos)
+            // Últimas 5 hortas com contagem de produtos (baseada em HortaProdutos)
             var recentes = await _db.Hortas
                 .AsNoTracking()
                 .Include(h => h.Usuario)
@@ -158,6 +160,42 @@ namespace HortalisCSharp.Controllers
 
             ViewData["Title"] = "Relatórios";
             return View(vm);
+        }
+
+        // GET: /Admin/BuscarProdutos?q=...
+        [HttpGet]
+        public async Task<IActionResult> BuscarProdutos(string q)
+        {
+            // busca os top produtos (grupo por nome) e filtra localmente usando normalização (remoção de acentos)
+            var produtos = await _db.HortaProdutos
+                .AsNoTracking()
+                .Include(hp => hp.Produto)
+                .Where(hp => hp.Produto != null)
+                .GroupBy(hp => hp.Produto!.Nome)
+                .Select(g => new RelatoriosViewModel.ProductStat { Nome = g.Key!, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Take(200)
+                .ToListAsync();
+
+            if (string.IsNullOrWhiteSpace(q))
+                return Json(produtos);
+
+            var nq = NormalizeForSearch(q);
+            var filtered = produtos.Where(p => NormalizeForSearch(p.Nome).Contains(nq)).ToList();
+            return Json(filtered);
+        }
+
+        private static string NormalizeForSearch(string? s)
+        {
+            if (string.IsNullOrEmpty(s)) return string.Empty;
+            var normalized = s.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+            foreach (var ch in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
+                    sb.Append(ch);
+            }
+            return sb.ToString().ToLowerInvariant().Trim();
         }
 
         // POST: /Admin/AtualizarPapel

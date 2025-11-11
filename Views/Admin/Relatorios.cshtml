@@ -219,7 +219,7 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Usuários — editar papéis</span>
+                    <span>Usuários à editar papéis</span>
                     <small class="text-muted">Alterações são aplicadas imediatamente</small>
                 </div>
 
@@ -321,24 +321,87 @@
             const listContainer = document.getElementById('prodList');
             if (!input || !listContainer) return;
 
+            // initial products serialized from server (camelCase)
+            const initialProducts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopProdutos ?? new(), new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }));
+
             function normalize(s) {
-                // remove acentos e normaliza
-                return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+                return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
             }
 
-            function getItems() {
-                return Array.from(listContainer.querySelectorAll('.prod-item'));
-            }
-
-            input.addEventListener('input', function () {
-                const q = normalize(this.value);
-                const items = getItems();
-                items.forEach(item => {
-                    const nameEl = item.querySelector('.prod-name');
-                    const name = normalize(nameEl ? nameEl.textContent : '');
-                    item.style.display = q === '' || name.includes(q) ? '' : 'none';
+            function escapeHtml(s) {
+                return (s || '').toString().replace(/[&<>"'`=\/]/g, function (c) {
+                    return ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#39;',
+                        '/': '&#47;',
+                        '=': '&#61;',
+                        '`': '&#96;'
+                    })[c];
                 });
-            });
+            }
+
+            function renderProducts(products) {
+                if (!products || products.length === 0) {
+                    listContainer.innerHTML = '<div class="list-group-item text-muted">Nenhum produto encontrado</div>';
+                    return;
+                }
+
+                listContainer.innerHTML = products.map(p => {
+                    // p.nome and p.count expected from server (camelCase)
+                    const name = escapeHtml(p.nome ?? p.nome ?? '');
+                    const count = Number(p.count || 0);
+                    return `<div class="list-group-item d-flex justify-content-between align-items-center prod-item">
+                                <div class="prod-name">${name}</div>
+                                <span class="badge bg-success">${count}</span>
+                            </div>`;
+                }).join('');
+            }
+
+            // debounce helper
+            function debounce(fn, wait = 200) {
+                let t = null;
+                return (...args) => {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn(...args), wait);
+                };
+            }
+
+            let lastQuery = null;
+
+            const doSearch = debounce(async function () {
+                const qRaw = input.value || '';
+                const q = normalize(qRaw);
+                if (q === lastQuery) return;
+                lastQuery = q;
+
+                // If query is short, filter client-side (fast)
+                if (!q || q.length < 3) {
+                    const filtered = initialProducts.filter(p => normalize(p.nome).includes(q));
+                    renderProducts(filtered);
+                    return;
+                }
+
+                // Query server for better results (accent-insensitive handled server-side)
+                try {
+                    const res = await fetch(`/Admin/BuscarProdutos?q=${encodeURIComponent(qRaw)}`, { headers: { 'Accept': 'application/json' } });
+                    if (!res.ok) {
+                        renderProducts([]);
+                        return;
+                    }
+                    const data = await res.json();
+                    renderProducts(data);
+                } catch (err) {
+                    renderProducts([]);
+                }
+            }, 220);
+
+            // initial render (already rendered by Razor, but ensure JS state is consistent)
+            // do not override UI if user hasn't typed; just sync initialProducts if needed.
+            // Start listening to input changes
+            input.addEventListener('input', doSearch);
         })();
     </script>
 
@@ -381,8 +444,8 @@
                         fillOpacity: 0.18,
                         radius: radius
                     }).addTo(map);
-                    circle.bindTooltip(`${p.areaNome} — ${p.count} indicação${p.count !== 1 ? 'ões' : ''}`, { direction: 'auto' });
-                    circle.bindPopup(`<strong>${p.areaNome}</strong><br/>${p.count} indicação${p.count !== 1 ? 'ões' : ''}`);
+                    circle.bindTooltip(`${p.areaNome} é ${p.count} indicação${p.count !== 1 ? 's' : ''}`, { direction: 'auto' });
+                    circle.bindPopup(`<strong>${p.areaNome}</strong><br/>${p.count} indicação${p.count !== 1 ? 's' : ''}`);
                     circles.push({ meta: p, layer: circle });
                 });
             } else {
