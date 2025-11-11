@@ -50,12 +50,12 @@ Funcionalidades Principais
 
 Tecnologias
 -----------
--Backend: .NET 8 / C# 12 (Razor Pages + Controllers auxiliares)
--ORM: Entity Framework Core (migrations, LINQ, Data Annotations)
--Banco de Dados: SQL Server
--Frontend: Bootstrap 5, Leaflet.js, SweetAlert2
--APIs: OpenStreetMap / Nominatim (para reverse geocoding)
--Serialização: System.Text.Json
+- Backend: .NET 8 / C# 12 (Razor Pages + Controllers auxiliares)
+- ORM: Entity Framework Core (migrations, LINQ, Data Annotations)
+- Banco de Dados: SQL Server
+- Frontend: Bootstrap 5, Leaflet.js, SweetAlert2
+- APIs: OpenStreetMap / Nominatim (para reverse geocoding)
+- Serialização: System.Text.Json
 
 Arquitetura
 ----------
