@@ -70,6 +70,19 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
+    <style>
+        /* tooltip pequeno com as coordenadas sobre o pin */
+        .coordinate-tooltip {
+            background: rgba(255,255,255,0.95);
+            color: #111;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+    </style>
+
     <script>
         (function(){
             // MAPA LEAFLET
@@ -93,10 +106,50 @@
 
             let marker = null;
 
+            // detecta separador decimal usado pelo navegador/locale (para compatibilidade com validação do servidor)
+            const decimalSeparator = (function(){
+                try {
+                    // Intl ou toLocaleString podem devolver '1,1' em pt-BR
+                    const s = (1.1).toLocaleString();
+                    const sep = s.replace(/\d/g, '').charAt(0);
+                    return sep || '.';
+                } catch {
+                    return '.';
+                }
+            })();
+
+            function formatLatLngForDisplay(latlng){
+                // formato legível no tooltip (usa separador local)
+                const lat = Number(latlng.lat).toFixed(6).replace('.', decimalSeparator);
+                const lng = Number(latlng.lng).toFixed(6).replace('.', decimalSeparator);
+                return `${lat}, ${lng}`;
+            }
+
+            function formatLatLngForBackend(latlng){
+                // formato que o backend espera com ponto decimal (invariant) — porém se a cultura do servidor
+                // exige vírgula, o valor de input oculto será escrito com o separador local para que o
+                // model binder parse corretamente. Usamos o mesmo separador local nos inputs.
+                const lat = Number(latlng.lat).toFixed(6).replace('.', decimalSeparator);
+                const lng = Number(latlng.lng).toFixed(6).replace('.', decimalSeparator);
+                return { lat, lng };
+            }
+
             function setInputsFromLatLng(latlng){
                 if(!latInput || !lngInput) return;
-                latInput.value = latlng.lat.toFixed(6);
-                lngInput.value = latlng.lng.toFixed(6);
+                const formatted = formatLatLngForBackend(latlng);
+                latInput.value = formatted.lat;
+                lngInput.value = formatted.lng;
+            }
+
+            function updateMarkerTooltip(m, latlng){
+                if(!m) return;
+                const content = formatLatLngForDisplay(latlng);
+                const tt = m.getTooltip();
+                if(tt) {
+                    try { tt.setContent(content); } catch {}
+                } else {
+                    m.bindTooltip(content, { permanent: true, direction: 'top', offset: [0, -12], className: 'coordinate-tooltip' });
+                }
             }
 
             function addOrMoveMarker(latlng){
@@ -104,17 +157,31 @@
                     marker.setLatLng(latlng);
                 } else {
                     marker = L.marker(latlng, {draggable:true}).addTo(map);
+
+                    // atualiza inputs enquanto arrasta para dar feedback contínuo
+                    marker.on('drag', function(){
+                        const p = marker.getLatLng();
+                        setInputsFromLatLng(p);
+                        updateMarkerTooltip(marker, p);
+                    });
+
+                    // no fim do drag, garante valor final
                     marker.on('dragend', function(){
                         const p = marker.getLatLng();
                         setInputsFromLatLng(p);
+                        updateMarkerTooltip(marker, p);
                     });
                 }
+
+                // atualiza tooltip e inputs
                 setInputsFromLatLng(latlng);
+                updateMarkerTooltip(marker, latlng);
             }
 
             // se já existe posição (create pode começar vazio)
             if(!isNaN(initialLat) && !isNaN(initialLng)){
                 addOrMoveMarker(L.latLng(initialLat, initialLng));
+                map.setView([initialLat, initialLng], 13);
             }
 
             map.on('click', function(e){
@@ -230,3 +297,4 @@
         })();
     </script>
 }
+@* funcional *@
