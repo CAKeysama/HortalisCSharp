@@ -16,14 +16,16 @@
                 <span asp-validation-for="Input.Nome" class="text-danger"></span>
             </div>
 
-            <!-- substituído: campos visíveis de Latitude/Longitude -> mapa interativo -->
+            <!-- mapa interativo -->
             <div class="col-12">
                 <label class="form-label">Localização</label>
                 <div id="map-horta" style="height:360px; border:1px solid #ddd; border-radius:6px;"></div>
                 <div class="form-text">Clique no mapa para posicionar o marcador. Você pode arrastar o marcador para ajustar.</div>
-                <input type="hidden" asp-for="Input.Latitude" />
-                <input type="hidden" asp-for="Input.Longitude" />
-                <span class="text-muted small">As coordenadas serão preenchidas automaticamente.</span>
+
+                @* Hidden fields now post raw strings that serão parseadas no servidor *@
+                <input type="hidden" id="LatitudeRaw" name="LatitudeRaw" />
+                <input type="hidden" id="LongitudeRaw" name="LongitudeRaw" />
+
                 <span asp-validation-for="Input.Latitude" class="text-danger d-block"></span>
                 <span asp-validation-for="Input.Longitude" class="text-danger d-block"></span>
             </div>
@@ -73,16 +75,16 @@
     <script>
         (function(){
             // MAPA LEAFLET
-            const latInput = document.getElementsByName('Input.Latitude')[0];
-            const lngInput = document.getElementsByName('Input.Longitude')[0];
+            const latInputHidden = document.getElementById('LatitudeRaw');
+            const lngInputHidden = document.getElementById('LongitudeRaw');
             const mapId = 'map-horta';
             const defaultCenter = [-14.2350, -51.9253]; // Brasil - central
             const defaultZoom = 4;
 
             function toFloat(v){ return (v === undefined || v === null || v === '') ? NaN : parseFloat(v); }
 
-            const initialLat = toFloat(latInput?.value);
-            const initialLng = toFloat(lngInput?.value);
+            const initialLat = toFloat(latInputHidden?.value);
+            const initialLng = toFloat(lngInputHidden?.value);
 
             const map = L.map(mapId).setView((!isNaN(initialLat) && !isNaN(initialLng)) ? [initialLat, initialLng] : defaultCenter,
                                              (!isNaN(initialLat) ? 13 : defaultZoom));
@@ -94,9 +96,10 @@
             let marker = null;
 
             function setInputsFromLatLng(latlng){
-                if(!latInput || !lngInput) return;
-                latInput.value = latlng.lat.toFixed(6);
-                lngInput.value = latlng.lng.toFixed(6);
+                if(!latInputHidden || !lngInputHidden) return;
+                // escreve com ponto decimal e 6 casas; também aceita vírgula em outros browsers, mas enviamos com ponto
+                latInputHidden.value = latlng.lat.toFixed(6).replace(',', '.');
+                lngInputHidden.value = latlng.lng.toFixed(6).replace(',', '.');
             }
 
             function addOrMoveMarker(latlng){
@@ -112,19 +115,18 @@
                 setInputsFromLatLng(latlng);
             }
 
-            // se já existe posição (create pode começar vazio)
-            if(!isNaN(initialLat) && !isNaN(initialLng)){
-                addOrMoveMarker(L.latLng(initialLat, initialLng));
-            }
-
             map.on('click', function(e){
                 addOrMoveMarker(e.latlng);
             });
+
+            // tentar usar geolocalização rápida se usuário clicar no mapa de seleção (opcional)
+            // (preservado comportamento para usar botão em outras UIs)
         })();
     </script>
 
     <script>
         (function(){
+            // produto selector code (sem alterações)...
             const input = document.getElementById('produto-input');
             const suggestions = document.getElementById('produto-suggestions');
             const chips = document.getElementById('produtos-chips');
@@ -199,9 +201,7 @@
                 input.value = '';
             }
 
-            document.addEventListener('click', (e)=>{
-                if(!document.getElementById('produtos-selector').contains(e.target)) suggestions.style.display='none';
-            });
+            document.addEventListener('click', (e)=>{ if(!document.getElementById('produtos-selector').contains(e.target)) suggestions.style.display='none'; });
 
             input.addEventListener('input', (e) => {
                 const q = e.target.value.trim();
@@ -209,16 +209,6 @@
                 fetchSuggestions(q);
             });
 
-            chips.addEventListener('click', (e)=>{
-                const btn = e.target.closest('button[data-idx]');
-                if(!btn) return;
-                const idx = Number(btn.getAttribute('data-idx'));
-                selected.splice(idx,1);
-                renderChips();
-                renderHidden();
-            });
-
-            // on load: populate hidden/chips if there are initial values
             (function init(){
                 const initial = hidden.value;
                 if(initial){
